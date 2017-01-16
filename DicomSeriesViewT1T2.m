@@ -1,4 +1,4 @@
-function DicomSeriesViewT1T2()
+function result = DicomSeriesViewT1T2()
 %DICOMSERIESVIEW Implementation of a simple dicom image series scroll 
 %viewer and segmenting a chosen area (in this case works well with a 
 %vertebra).
@@ -89,7 +89,7 @@ end
 % upon pressing the space key.
 function key_pressed_fcn( figureObject, ~, dcmImgsT1, dcmImgsT2, dcmImgSize)
     if strcmp(get(figureObject, 'CurrentKey'),'space')
-        VertebraSegmentationT1T2( dcmImgsT1, dcmImgsT2, dcmImgSize, dcmImageIndex, additionalBorderWidth );
+        result = VertebraSegmentationT1T2( dcmImgsT1, dcmImgsT2, dcmImgSize, dcmImageIndex, additionalBorderWidth );
     end
 end
 

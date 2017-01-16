@@ -8,9 +8,6 @@ sSqr = sImg(1) * sImg(2);
 
 indexImg = reshape(1:sSqr, sX, sY);
 
-% Initialize graph for graph cut.
-Dvec = zeros(sSqr);
-
 % Minus middle, only compute half the entries (rest in transposed)
 numN = ((2*neighborhood+1) * (2*neighborhood+1) - 1)/2;
 nX = zeros(numN,1);
@@ -56,8 +53,6 @@ for neigh = 1:numN
    conn = conn / sqrt(x*x + y*y);
    
    % All x/y combinations.
-%    co0 = repmat(s0x',1,size(s0y,2)) + repmat(s0y,size(s0x,2),1)*sX;
-%    co1 = repmat(s1x',1,size(s1y,2)) + repmat(s1y,size(s1x,2),1)*sX;
    so0 = indexImg(s0x, s0y);
    so1 = indexImg(s1x, s1y);
 
