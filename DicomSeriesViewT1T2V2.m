@@ -14,7 +14,7 @@ function [resultImage, resultMask] = DicomSeriesViewT1T2()
 %         darkest area surrounding the vertebra
 
 close all;
-%clear all;
+clear all;
 clc;
 
 % This index contains the current index of a dicom image series.
@@ -71,6 +71,7 @@ set(figureHandle,'KeyPressFcn', {@key_pressed_fcn,dcmImgsT1,dcmImgsT2,dcmImgSize
 function showDCMImage(~,eventData,dcmImgs,dcmImgSize,maxIndex)
 
     persistent scrollViewIndex;
+    
     if isempty(scrollViewIndex)
         scrollViewIndex = 0;
     else
@@ -87,9 +88,10 @@ end
 
 % Nested callback function to call the 'VertebraSegmmentation' function 
 % upon pressing the space key.
-function key_pressed_fcn( figureObject, ~, dcmImgsT1, dcmImgsT2, dcmImgSize)
+function [resultImage, resultMask] = key_pressed_fcn( figureObject, ~, dcmImgsT1, dcmImgsT2, dcmImgSize)
     if strcmp(get(figureObject, 'CurrentKey'),'space')
         [resultImage, resultMask] = VertebraSegmentationT1T2( dcmImgsT1, dcmImgsT2, dcmImgSize, dcmImageIndex, additionalBorderWidth );
+        close(figureObject);
     end
 end
 
