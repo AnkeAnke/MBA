@@ -1,7 +1,7 @@
 % dcmImgs as dicom image series strip (containing all), 
 % dcmImgSize as dimension of one image on the dicom image series strip, 
 % dcmImageIndex as index of image on the dicom image series strip
-function result = VertebraSegmentationT1T2( dcmImgsT1, dcmImgsT2, dcmImgSize, dcmImageIndex, additionalBorderWidth )
+function [resultImage, resultMask]= VertebraSegmentationT1T2( dcmImgsT1, dcmImgsT2, dcmImgSize, dcmImageIndex, additionalBorderWidth )
 %VERTEBRASEGMENTATION Segmentation of a chosen (via user input) vertebra.
     % Span a rectangle on dicom image (from left to right only, at the
     % moment!).
@@ -12,7 +12,7 @@ function result = VertebraSegmentationT1T2( dcmImgsT1, dcmImgsT2, dcmImgSize, dc
     mask(floor(top):floor(bottom),floor(left):floor(right)) = 1;
 
     % Initial rectangular box mask, imshow here for debug purposes.
-    figure,
+    figure;
     subplot(2,3,1);imshow(mask);
     title('Initial Contour Location');
     
@@ -55,16 +55,21 @@ function result = VertebraSegmentationT1T2( dcmImgsT1, dcmImgsT2, dcmImgSize, dc
         imshow(segmentedVertebraImgContourMaskClippedT2);
         title('Segmented Dicom Image T2');
     end
-    leftClamped = min(dcmImgSize(2),max(floor(left)-additionalBorderWidth,1))
-    topClamped = min(dcmImgSize(1),max(floor(top)-additionalBorderWidth,1))
-    rightClamped = max(1,min(floor(right)+additionalBorderWidth,dcmImgSize(2)))
-    bottomClamped = max(1,min(floor(bottom)+additionalBorderWidth,dcmImgSize(1)))
+    leftClamped = min(dcmImgSize(2),max(floor(left)-additionalBorderWidth,1));
+    topClamped = min(dcmImgSize(1),max(floor(top)-additionalBorderWidth,1));
+    rightClamped = max(1,min(floor(right)+additionalBorderWidth,dcmImgSize(2)));
+    bottomClamped = max(1,min(floor(bottom)+additionalBorderWidth,dcmImgSize(1)));
     
-    result = segmentedVertebraImgContourMaskClippedT2(topClamped:bottomClamped,leftClamped:rightClamped);
+    resultMask = combinedmaskT1T2(topClamped:bottomClamped,leftClamped:rightClamped);
+    resultImage = segmentedVertebraImgContourMaskClippedT2(topClamped:bottomClamped,leftClamped:rightClamped);
     
     figure;
-    imshow(result);
-    title('result');
+    imshow(resultImage);
+    title('resultImage');
+    
+    figure;
+    imshow(resultMask);
+    title('resultMask');
 end
 
 
