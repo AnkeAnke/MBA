@@ -1,16 +1,21 @@
-% dcmImgs as dicom image series strip (containing all), 
+% dcmImgs as dicom fimage series strip (containing all), 
 % dcmImgSize as dimension of one image on the dicom image series strip, 
 % dcmImageIndex as index of image on the dicom image series strip
-function [resultMask] = VertebraSegmentationT1T2V2(dcmImgT1, dcmImgT2)
+function [resultMask] = VertebraSegmentationT1T2V2(dcmImgT1, dcmImgT2, initialMask)
 %VERTEBRASEGMENTATION Segmentation of a chosen (via user input) vertebra.
-    % Span a rectangle on dicom image (from left to right only, at the
-    % moment!).
-    [left,top] = ginput(1);
-    [right,bottom] = ginput(1);
-    % Fill initial mask with ones, for following iterative active contour algotihm.
     mask = zeros(size(dcmImgT1));
-    mask(floor(top):floor(bottom),floor(left):floor(right)) = 1;
-
+    if nargin == 3
+        mask=initialMask;
+    end
+    if nargin < 3
+        % Span a rectangle on dicom image (from left to right only, at the
+        % moment!).
+        [left,top] = ginput(1);
+        [right,bottom] = ginput(1);
+        % Fill initial mask with ones, for following iterative active contour algotihm.
+        mask = zeros(size(dcmImgT1));
+        mask(floor(top):floor(bottom),floor(left):floor(right)) = 1;
+    end
     % Initial rectangular box mask, imshow here for debug purposes.
     %figure;
     %subplot(2,3,1);imshow(mask);
