@@ -1,5 +1,5 @@
-clear;
-close;
+clear all;
+close all;
 clc;
 
 % This index contains the current index of a dicom image series.
