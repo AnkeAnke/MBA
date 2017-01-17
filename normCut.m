@@ -1,10 +1,17 @@
-function [eVec1, eVec2, eVec3] = normCut( img, neighborhood )
+function [eVec1, eVec2, eVec3] = normCut( img, mask, neighborhood, minval )
+
+img(mask <= 0) = nan;
 
 % Save sizes to variables.
 sImg = size(img);
 sX = sImg(1);
 sY = sImg(2);
 sSqr = sImg(1) * sImg(2);
+
+% Number of elements in mask.
+sMask = sum(sum(mask > 0));
+mask = double(mask);
+mask(mask>0) = 1:sMask;
 
 indexImg = reshape(1:sSqr, sX, sY);
 
@@ -26,7 +33,7 @@ for x = -neighborhood:neighborhood
 end 
 
 % Diagonal: Connection to themselves.
-selfDist = reshape(img.*img, sSqr, 1);
+selfDist = reshape(abs(img-minval), sSqr, 1);
 
 % Here the graph will be stored. Upper bound on neighbors: numN.
 graph = sparse(1:sSqr, 1:sSqr, selfDist, sSqr, sSqr, sSqr * numN);
@@ -51,10 +58,10 @@ for neigh = 1:numN
    conn = (img(s0x,s0y) - img(s1x,s1y));
    conn = 1.0 - sqrt(sqrt(sqrt(sqrt(abs(conn)))));
    conn = conn / sqrt(x*x + y*y);
-   
-   % All x/y combinations.
-   so0 = indexImg(s0x, s0y);
-   so1 = indexImg(s1x, s1y);
+  
+    % All x/y combinations.
+    so0 = indexImg(s0x, s0y);
+    so1 = indexImg(s1x, s1y);
 
    % Add to graph.
    graph = graph + sparse( ...
@@ -67,75 +74,93 @@ for neigh = 1:numN
         [conn], sSqr, sSqr);
 end
 
+graph( ~any(graph,2), : ) = [];  %rows
+graph( :, ~any(graph,1) ) = [];  %columns
+
 figure, spy(graph)
 
 % Sum up connection.
 Dvec = sum(graph);
 D = diag(Dvec);
-figure, imshow(reshape(full(Dvec)/max(Dvec), sX,sY));
-[eigVec,eigVal] = eigs(D-graph,D,5,'sm');
-% [eigVec,eigVal] = eig(D-graph,D,'qz');
+Dimg = mask;
+Dimg(mask>0) = full(Dvec) / max(Dvec);
+figure, imshow(Dimg);
+
+% Solve eigenvalue problem.
+% Probably the most expensive line in this script.
+sEigs = 9;
+[eigVec,eigVal] = eigs(D-graph,D,sEigs,'sm');
 
 display('Minimal Eigenvalues');
 
-eVec1  = reshape(eigVec(:,1), sX, sY);
+% Map to range [-1,1]
+eigVec = eigVec * diag(1./sum(eigVec,1))';
 
-eVec2  = reshape(eigVec(:,2), sX, sY);
-
-eVec3  = reshape(eigVec(:,3), sX, sY);
-
-eVec4  = reshape(eigVec(:,4), sX, sY);
-
-eVec5  = reshape(eigVec(:,5), sX, sY);
-
-% ========= Display =========
-
+% ======= Display original image ======= %
 display(eigVal);
 
-
-
+% Height of subplot
+h = (sEigs+1)/2;
 
 figure
-subplot(2,3,1); imshow(img);
+subplot(2,h,1); imshow(img);
 colormap(gray);
 freezeColors;
 
-eMax = max( max(max(eVec5)), -min(min(eVec5)) );
-eVec5 = eVec5 / eMax;
-subplot(2,3,2); imshow(eVec5, [-1,1]);
-title(['Eigenvector 1: ' num2str(eigVal(5,5))]);
+% eMax = max( max(eigVec(:,sEigs), -min(eigVec(:,sEigs))) );
+% subplot(2,3,2); imshow(eigVec(:,sEigs), [-1,1]);
+% title(['Eigenvector 1: ' num2str(eigVal(5,5))]);
 
 
-eMax = max( max(max(eVec4)), -min(min(eVec4)) );
-eVec4 = eVec4 / eMax;
-subplot(2,3,3); imshow(eVec4, [-1,1]);
-title(['Eigenvector 2: ' num2str(eigVal(4,4))]);
-colormap(HalfColormap(RefineCut(eVec4)));
-colorbar;
-freezeColors;
 
-eMax = max( max(max(eVec3)), -min(min(eVec3)) );
-eVec3 = eVec3 / eMax;
-subplot(2,3,4); imshow(eVec3, [-1,1]);
-title(['Eigenvector 3: ' num2str(eigVal(3,3))]);
-colormap(HalfColormap(RefineCut(eVec3)));
-colorbar;
-freezeColors;
+% ======= Display cut eigenvectors ======= %
+% Cut out each eigenvector by mask.
 
-eMax = max( max(max(eVec2)), -min(min(eVec2)) );
-eVec2 = eVec2 / eMax;
-subplot(2,3,5); imshow(eVec2, [-1,1]);
-title(['Eigenvector 4: ' num2str(eigVal(2,2))]);
-colormap(HalfColormap(RefineCut(eVec2)));
-colorbar;
-freezeColors;
+% Save cut values here.
+cuts = zeros(sEigs,1);
+for v = 1:(sEigs-1)
+    
+    evec = eigVec(:,v);
 
-eMax = max( max(max(eVec1)), -min(min(eVec1)) );
-eVec1 = eVec1 / eMax;
-subplot(2,3,6); imshow(eVec1, [-1,1]);
-title(['Eigenvector 5: ' num2str(eigVal(1,1))]);
-colormap(HalfColormap(RefineCut(eVec1)));
-colorbar;
+    % Compute maximal absolute value for colormapping.
+    eMax = max( max(evec), -min(evec) );
+    
+    % Refill to full image.
+    fullImg = mask;
+    fullImg(mask>0) = evec;
+    fullImg(mask<=0) = -10;
+    
+    % Plot. Map image to range [-1,1]
+    subplot(2,h,sEigs+1-v); imshow(fullImg/eMax, [-1,1]);
+    title(['Eigenvalue' num2str(eigVal(v,v))]);
+    
+    % Compute the optimal cut value and build a colormap from it.
+    cuts(v) = OptimizeNcut(graph, evec);
+    colormap(HalfColormap(cuts(v))); %RefineCut(eVec4)));
+    %colorbar;
+    freezeColors;
+end
+
+% Split to segments.
+segs = zeros(size(eigVec(:,1)));
+
+% Binary representation as ID. Map to color for viewing.
+for i = 1:(sEigs-1)
+    segs(eigVec(:,i) > cuts(i)) = segs(eigVec(:,i) > cuts(i)) + 2^i;
+end
+
+% Random color per ID.
+map = rand((2^sEigs)+2,3);
+map(1,:) = 0;
+
+% Display segments.
+fullImg = mask;
+fullImg(mask > 0) = segs;
+subplot(2,h,2*h); imshow(fullImg, [0,size(map,1)]);
+title('Segments');
+
+colormap(map);
+%colorbar;
 freezeColors;
 
 end

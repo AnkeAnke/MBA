@@ -1,3 +1,5 @@
+% Colormap that is cut at the given value:
+% All values higher than val are colored slightly red.
 function [ map ] = HalfColormap( val )
 cut = (val+1)/2;
 map = [linspace(0,cut,200*cut)' linspace(0,cut,200*cut)' linspace(0,cut,200*cut)'
