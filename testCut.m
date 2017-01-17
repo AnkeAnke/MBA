@@ -65,7 +65,6 @@ rmpath('./Working_Data/T2');
 
 % Your part
 %img = imgToGrey(imread('test.png'));
-% img = DicomSeriesViewT1T2();
 % imshow(img)
 
 %mask = ones(size(img));

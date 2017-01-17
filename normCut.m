@@ -1,6 +1,27 @@
 function [eVec1, eVec2, eVec3] = normCut( img, mask, neighborhood, minval )
 
+subplot(1,2,1); imshow(mask, [0 1]);
+
+% Reduce the image to the minimal axis-parallel box around the mask.
+[minBox maxBox] = MaskBox(mask);
+img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2));
+mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
+
+% Set masked-out ares to nan.
+% This will invalidate all edges to and from this area.
 img(mask <= 0) = nan;
+
+subplot(1,2,2); imshow(mask, [0 1]);
+
+% If no neighborhood value is given, take a small one.
+if nargin < 3
+   neighborhood = 5;
+end
+
+% If no indicator value is given, take a standard value.
+if nargin < 4
+   minval = 0; 
+end
 
 % Save sizes to variables.
 sImg = size(img);
@@ -103,7 +124,7 @@ display(eigVal);
 h = (sEigs+1)/2;
 
 figure
-subplot(2,h,1); imshow(img);
+subplot(2,h,1); imshow(img, [min(min(img)) max(max(img))]);
 colormap(gray);
 freezeColors;
 

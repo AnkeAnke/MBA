@@ -1,6 +1,7 @@
-% Find the splitting point in the eigenvector image.
-% Compute numTests NCUT values and choose the best among them.
 function [ threshold ] = OptimizeNcut( graph, eigs, numTests )
+% OPTIMIZENCUT Find the splitting point in the eigenvector image.
+%   Compute numTests NCUT values and choose the best among them.
+
     % Standard arg.
     if nargin < 3
             numTests = 20;
@@ -28,7 +29,7 @@ function [ threshold ] = OptimizeNcut( graph, eigs, numTests )
        
        graphCopy = graph;
        
-       % Sum of all edges from points in A (r B) to any point.
+       % Sum of all edges from points in A (or B) to any point.
        assocAV = sum(sum( graphCopy(:,eig >=tests(t)) ));
        assocBV = sum(sum( graphCopy(:,eig < tests(t)) ));
        
