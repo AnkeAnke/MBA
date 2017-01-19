@@ -7,7 +7,7 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         resultMask=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,index)), uint16(dcmImgsT2(:,:,index)) );
         close(figureObject);
         
-        MaskDebugHelperFnc(dcmImgsT1,dcmImgsT2,resultMask, index);
+        %MaskDebugHelperFnc(dcmImgsT1,dcmImgsT2,resultMask, index);
         
         %figure;
         %imshow(max(dcmImgsT2(:)/2.0)*uint16(dcmImgsT2(:,:,myhandles.scrollViewIndex+1)));
