@@ -1,17 +1,17 @@
-function [eVec1, eVec2, eVec3] = normCut( img, mask, neighborhood, minval )
+function [subMask,segmentation] = normCut( img, mask, neighborhood, minval, currentSegmentation )
 
-subplot(1,2,1); imshow(mask, [0 1]);
+segmentation = mask - 1;
 
 % Reduce the image to the minimal axis-parallel box around the mask.
 [minBox maxBox] = MaskBox(mask);
 img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2));
 mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
 
+original = img;
+
 % Set masked-out ares to nan.
 % This will invalidate all edges to and from this area.
 img(mask <= 0) = nan;
-
-subplot(1,2,2); imshow(mask, [0 1]);
 
 % If no neighborhood value is given, take a small one.
 if nargin < 3
@@ -23,6 +23,11 @@ if nargin < 4
    minval = 0; 
 end
 
+% If no segmentation is given, set all to ID 0
+if nargin < 5
+   currentSegmentation = zeros(size(mask));
+end
+
 % Save sizes to variables.
 sImg = size(img);
 sX = sImg(1);
@@ -32,7 +37,7 @@ sSqr = sImg(1) * sImg(2);
 % Number of elements in mask.
 sMask = sum(sum(mask > 0));
 mask = double(mask);
-mask(mask>0) = 1:sMask;
+% mask(mask>0) = 1:sMask;
 
 indexImg = reshape(1:sSqr, sX, sY);
 
@@ -58,6 +63,7 @@ selfDist = reshape(abs(img-minval), sSqr, 1);
 
 % Here the graph will be stored. Upper bound on neighbors: numN.
 graph = sparse(1:sSqr, 1:sSqr, selfDist, sSqr, sSqr, sSqr * numN);
+variance = var(img(mask > 0));
 
 % Fill with submatrices and compute connectivity.
 for neigh = 1:numN
@@ -77,7 +83,9 @@ for neigh = 1:numN
    end
    
    conn = (img(s0x,s0y) - img(s1x,s1y));
-   conn = 1.0 - sqrt(sqrt(sqrt(sqrt(abs(conn)))));
+   % Shi & Malik paper
+   conn = exp((conn .* conn)/variance);
+   % Shi & Malik paper uses differently
    conn = conn / sqrt(x*x + y*y);
   
     % All x/y combinations.
@@ -94,23 +102,22 @@ for neigh = 1:numN
         [so0], ...
         [conn], sSqr, sSqr);
 end
-
 graph( ~any(graph,2), : ) = [];  %rows
 graph( :, ~any(graph,1) ) = [];  %columns
 
-figure, spy(graph)
+% figure, spy(graph)
 
 % Sum up connection.
 Dvec = sum(graph);
 D = diag(Dvec);
 Dimg = mask;
 Dimg(mask>0) = full(Dvec) / max(Dvec);
-figure, imshow(Dimg);
+% figure, imshow(Dimg);
 
 % Solve eigenvalue problem.
 % Probably the most expensive line in this script.
-sEigs = 9;
-[eigVec,eigVal] = eigs(D-graph,D,sEigs,'sm');
+sEigs = 6;
+[eigVec,eigVal] = eigs(D-graph,D,sEigs+1,'sm');
 
 display('Minimal Eigenvalues');
 
@@ -121,28 +128,27 @@ eigVec = eigVec * diag(1./sum(eigVec,1))';
 display(eigVal);
 
 % Height of subplot
-h = (sEigs+1)/2;
+h = (sEigs+2)/2;
 
-figure
-subplot(2,h,1); imshow(img, [min(min(img)) max(max(img))]);
-colormap(gray);
-freezeColors;
-
-% eMax = max( max(eigVec(:,sEigs), -min(eigVec(:,sEigs))) );
-% subplot(2,3,2); imshow(eigVec(:,sEigs), [-1,1]);
-% title(['Eigenvector 1: ' num2str(eigVal(5,5))]);
-
-
+% figure
+% subplot(2,h,1); imshowMasked(img, 1-mask);
+% colormap(gray);
+% freezeColors;
 
 % ======= Display cut eigenvectors ======= %
 % Cut out each eigenvector by mask.
 
 % Save cut values here.
 cuts = zeros(sEigs,1);
-for v = 1:(sEigs-1)
+maxID = max(max(max(currentSegmentation)));
+for v = 1:sEigs
     
     evec = eigVec(:,v);
 
+    if ~CheckStability(evec)
+       break; 
+    end
+    
     % Compute maximal absolute value for colormapping.
     eMax = max( max(evec), -min(evec) );
     
@@ -151,38 +157,33 @@ for v = 1:(sEigs-1)
     fullImg(mask>0) = evec;
     fullImg(mask<=0) = -10;
     
-    % Plot. Map image to range [-1,1]
-    subplot(2,h,sEigs+1-v); imshow(fullImg/eMax, [-1,1]);
-    title(['Eigenvalue' num2str(eigVal(v,v))]);
-    
     % Compute the optimal cut value and build a colormap from it.
     cuts(v) = OptimizeNcut(graph, evec);
-    colormap(HalfColormap(cuts(v))); %RefineCut(eVec4)));
-    %colorbar;
-    freezeColors;
+    
+    subMask = mask;
+%     subMask(mask < cuts(v)) = 0;
+    segmentation = segmentation *2;
+    segmentation(fullImg > cuts(v)) = segmentation(fullImg > cuts(v)) + 1; % = maxID + v;
 end
 
-% Split to segments.
-segs = zeros(size(eigVec(:,1)));
-
-% Binary representation as ID. Map to color for viewing.
-for i = 1:(sEigs-1)
-    segs(eigVec(:,i) > cuts(i)) = segs(eigVec(:,i) > cuts(i)) + 2^i;
-end
-
-% Random color per ID.
-map = rand((2^sEigs)+2,3);
-map(1,:) = 0;
+segmentation(segmentation<0) = -1;
+% % Split to segments.
+% segs = zeros(size(eigVec(:,1)));
+% 
+% % Binary representation as ID. Map to color for viewing.
+% for i = 1:sEigs
+%     segs(eigVec(:,i) > cuts(i)) = segs(eigVec(:,i) > cuts(i)) + 2^(i-1);
+% end
 
 % Display segments.
-fullImg = mask;
-fullImg(mask > 0) = segs;
-subplot(2,h,2*h); imshow(fullImg, [0,size(map,1)]);
-title('Segments');
+% fullImg = mask;
+% fullImg(mask > 0) = segs;
 
-colormap(map);
-%colorbar;
-freezeColors;
+% Plot segmented image (color overlay)
+% subplot(2,h,2*h); 
+% imshowSegments(original, fullImg); %imshow(fullImg, [0,size(map,1)]);
+% title('Segments');
+% freezeColors;
 
 end
 

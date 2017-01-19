@@ -11,15 +11,15 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         
         masks(:,:,index)=resultMask;
         
-        for i=index+1:size(dcmImgsT1,3)
-            i
-            masks(:,:,i)=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,i)), uint16(dcmImgsT2(:,:,i)), masks(:,:,i-1) );
-        end
-        
-        for i=index-1:-1:1
-            i
-            masks(:,:,i)=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,i)), uint16(dcmImgsT2(:,:,i)), masks(:,:,i+1) );
-        end
+%         for i=index+1:size(dcmImgsT1,3)
+%             i
+%             masks(:,:,i)=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,i)), uint16(dcmImgsT2(:,:,i)), masks(:,:,i-1) );
+%         end
+%         
+%         for i=index-1:-1:1
+%             i
+%             masks(:,:,i)=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,i)), uint16(dcmImgsT2(:,:,i)), masks(:,:,i+1) );
+%         end
         
         intitalMaskIndex=0;
         initialMaskImg = (masks(:,:,intitalMaskIndex+1));
@@ -40,6 +40,6 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         img = (dcmImgsT2(:,:,myhandles.scrollViewIndex+1));
 
         % If we have a better "hole indicator", exchange the parameter.
-        normCut(img, resultMask, 8, 30); 
+        NormCutSegmentation(img, resultMask, 8, 30); 
     end
 end
