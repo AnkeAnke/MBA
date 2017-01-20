@@ -18,9 +18,13 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         %Call here the normalized graph cut segmentation.
         %img = (dcmImgsT2(:,:,sliceIndex));
 
+        threshold=200;
+        thresheldDcmImgsT2=ThresholdImages(uint16(dcmImgsT2), threshold);
+        
         % If we have a better "hole indicator", exchange the parameter.
         result3D = NormCutSegmentation(dcmImgsT2, resultMask, 8, 30);
         
-        imSeriesShowMasked( dcmImgsT2, result3D, sliceIndex );
+        %imSeriesShowMasked( dcmImgsT2, result3D, sliceIndex );
+        imSeriesShowMasked( thresheldDcmImgsT2, result3D, sliceIndex );
     end
 end
