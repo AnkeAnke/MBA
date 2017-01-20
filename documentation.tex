@@ -22,9 +22,9 @@
   \setcounter{page}{1}
   {
   	We were introduced to the problem of semiautomatic bone cement volumetry 
-  	on MR-images of a spline. The application to be developed is required 
-  	to detect such regions of the spine reliably, which need to be treated with 
-  	bone cement.\\
+  	on MR-images of a spline.
+    Our application is required 
+  	to detect such regions of the spine reliably to allow for volumetric measurements.\\
   	\\The data that is given presents the challenge, MR-images, which do not have
   	the strong contrast of CT-images nor are as noise free as CT-images, when it
   	comes to bone tissue. Thus more image processing becomes necessary to possibly 
@@ -37,12 +37,13 @@
   		\item Segment the chosen vertebra to its extent over the MR-images and measure the hollow regions volume, as precise as possible.
   	\end{enumerate}
   	We decided to keep it as simple as possible, by implementing the task at hand 
-  	entirely on Matlab, by choosing an adequate segmentation algorithm called 
-  	'Normalized Graph Cuts' \cite{[ShiMalik00]}, which only requires matrix operations.
+  	entirely on Matlab. 
+    As we are faced with possibly very uncommonly-shaped regions, we chose 'Normalized Graph Cuts' \cite{[ShiMalik00]} as our segmentation algorithm.
+    It is heavily based on matrix operations and does not enforce any 'roundness' of the result.
   	\\Matlab also has its own implementation of an active contour
   	operation \cite{[ChanVese01]}, which could be used to segment the vertebra needed to a satisfying degree for the actual task of bone cement volumetry.\\	
-  	\\In the following chapters we will first describe, how we implemented the vertebra segmentation.
-  	After we will move on describing our chosen filling compound segmentation inside the vertebra.
+  	\\In the following chapters we will first describe how we implemented the vertebra segmentation.
+  	Afterwards, we will move on to describing our chosen filling compound segmentation inside the vertebra.
   	At last in the remaining two chapters we will present our results and evaluate them, to see how well our application fare against the ground truth solution.
   }
   \pagebreak
@@ -69,15 +70,28 @@
     		\centering
     		\includegraphics[scale=0.4]{VertebraSegmentationExample_2.png}
     	\end{subfigure}
-    	\caption{Vertebra Segmentation Example}
+    	\caption{Vertebra Segmentation Example\\
+        The segmented area containing the cement region is highlighted in red. For further processing, the data is shrunk to the minimal box enclosing the mask.}
     \end{figure} 
   }	
   \pagebreak
   \section{Filling Compound Segmentation}
-  \begin{itemize}
-  	\item Hi, I'm a bullet point!
-  	\item $And~ I'm~ a~ F{\sigma}rmul{\alpha}! \sum_{bottom}^{top}$
-  \end{itemize}
+  
+  Within this rough segmentation of the vertebra body, we now search for the bone cement structures.
+  In this reduced dataset, we are faced with a relatively low resolution (approximately $50 \times 40$ pixels $\times 15$ slices), high inhomogeneities due to the porous structure of bones and irregular structures to be segmented.
+  The holes filled with bone cement show as low-valued areas.
+  Due to partial volume effects, the edges are not sharp. 
+  
+  Taking all this together, we decided to try \textit{Normalized Graph Cuts} as described by Shi and Malik~\cite{[ShiMalik00]} as segmentation algorithm.
+  Basically, the image is represented as a non-directed, weighted graph, with pixels and inter-pixel similarities corresponding to nodes and weights respectively.
+  Representing the graph to a Laplacian matrix, we are able to compute the \textit{real-valued minimal cut} by solving for eigenvectors with corresponding minimal eigenvalues.
+  This reads 
+%  \begin{equation}
+%\begin{alignedat}{2}
+%    test &= \Omega + S\\
+%    test2 &= 0
+%\end{alignedat}
+%  \end{equation}
   
   \pagebreak
   
