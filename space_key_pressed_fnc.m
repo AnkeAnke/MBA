@@ -5,7 +5,7 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         myhandles = guidata(gcbo);
         index = myhandles.scrollViewIndex+1;
         resultMask=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,index)), uint16(dcmImgsT2(:,:,index)) );
-        close(figureObject);
+        %close(figureObject);
         
         %MaskDebugHelperFnc(dcmImgsT1,dcmImgsT2,resultMask, index);
         

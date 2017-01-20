@@ -22,13 +22,13 @@ function [resultMask] = VertebraSegmentationT1T2V2(dcmImgT1, dcmImgT2, initialMa
     %title('Initial Contour Location');
     
     if ~isempty(dcmImgT1) && ~isempty(dcmImgT2)
-        bwT1 = activecontour(dcmImgT1,mask,200,'Chan-Vese',3.0); %Additional parameter 
+        bwT1 = activecontour(dcmImgT1,mask,200,'Chan-Vese',2.8); %Additional parameter 
                                                                  %'SmoothFactor' makes a 
                                                                  %huge difference (set 
                                                                  %to 3.0 gives really 
                                                                  %good
                                                                  %results).
-        bwT2 = activecontour(dcmImgT2,mask,200,'Chan-Vese',3.0);
+        bwT2 = activecontour(dcmImgT2,mask,200,'Chan-Vese',2.8);
                                   
         %subplot(2,3,2);imshow(bwT1);
         %title('Segmented Image T1');
