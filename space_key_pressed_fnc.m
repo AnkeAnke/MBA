@@ -16,9 +16,9 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         %imshow(uint16(resultMask).*(max(dcmImgsT2(:)/2.0)*uint16(dcmImgsT2(:,:,myhandles.scrollViewIndex+1))));
         
         %Call here the normalized graph cut segmentation.
-        img = (dcmImgsT2(:,:,myhandles.scrollViewIndex+1));
+        img = (dcmImgsT2(:,:,index));
 
         % If we have a better "hole indicator", exchange the parameter.
-        NormCutSegmentation(img, resultMask, 8, 30); 
+        result3D = NormCutSegmentation(dcmImgsT2, resultMask, 8, 30); 
     end
 end

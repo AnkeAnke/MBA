@@ -1,14 +1,7 @@
-function [subMask,segmentation] = normCut( img, mask, neighborhood, minval, currentSegmentation )
+function [segmentation,stop] = ...
+normCut( img, mask, neighborhood, minval, currentSegmentation, numCuts, output)
 
-segmentation = mask - 1;
-
-% Reduce the image to the minimal axis-parallel box around the mask.
-[minBox maxBox] = MaskBox(mask);
-img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2));
-mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
-
-original = img;
-
+% ======= Standard Parameters ====== %
 % Set masked-out ares to nan.
 % This will invalidate all edges to and from this area.
 img(mask <= 0) = nan;
@@ -28,6 +21,29 @@ if nargin < 5
    currentSegmentation = zeros(size(mask));
 end
 
+% If no cut number is given, take 2 for now (-> 4 segments each step)
+if nargin < 6
+   numCuts = 2;
+end
+
+% If nothing is specified, don't print debug output.
+if nargin < 7
+   output = true;
+end
+
+% ======= Initialization ====== %
+
+segmentation = currentSegmentation;
+stop = false;
+
+bigImg = img;
+maskNew = mask;
+% segNew = currentSegmentation;
+% Reduce the image to the minimal axis-parallel box around the mask.
+[minBox,maxBox] = MaskBox(mask);
+img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2));
+mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
+
 % Save sizes to variables.
 sImg = size(img);
 sX = sImg(1);
@@ -35,7 +51,7 @@ sY = sImg(2);
 sSqr = sImg(1) * sImg(2);
 
 % Number of elements in mask.
-sMask = sum(sum(mask > 0));
+% sMask = sum(sum(mask > 0));
 mask = double(mask);
 % mask(mask>0) = 1:sMask;
 
@@ -45,6 +61,8 @@ indexImg = reshape(1:sSqr, sX, sY);
 numN = ((2*neighborhood+1) * (2*neighborhood+1) - 1)/2;
 nX = zeros(numN,1);
 nY = zeros(numN,1);
+
+% ======= Build Connectivity Graph ====== %
 
 % Slow but small: Get all indices of neighbors.
 count = 1;
@@ -94,18 +112,25 @@ for neigh = 1:numN
 
    % Add to graph.
    graph = graph + sparse( ...
-        [so0], ...
-        [so1], ...
-        [conn], sSqr, sSqr);
+        so0, ...
+        so1, ...
+        conn, sSqr, sSqr);
     graph = graph + sparse( ...
-        [so1], ...
-        [so0], ...
-        [conn], sSqr, sSqr);
+        so1, ...
+        so0, ...
+        conn, sSqr, sSqr);
 end
+
+% ======= Solve Eigenvalue Problem ====== %
+
 graph( ~any(graph,2), : ) = [];  %rows
 graph( :, ~any(graph,1) ) = [];  %columns
 
-% figure, spy(graph)
+if output
+    figure
+    subplot(2,(numCuts+2)/2,1);
+    spy(graph)
+end
 
 % Sum up connection.
 Dvec = sum(graph);
@@ -116,8 +141,14 @@ Dimg(mask>0) = full(Dvec) / max(Dvec);
 
 % Solve eigenvalue problem.
 % Probably the most expensive line in this script.
-sEigs = 6;
-[eigVec,eigVal] = eigs(D-graph,D,sEigs+1,'sm');
+[eigVec,eigVal] = eigs(D-graph,D,numCuts+1,'sm');
+
+% Check whether the matrix is nearly singular.
+% [~, LASTID] = lastwarn;
+% if strcmp(LASTID, 'MATLAB:nearlySingularMatrix')
+%     stop = true;
+%     return;
+% end
 
 display('Minimal Eigenvalues');
 
@@ -125,48 +156,68 @@ display('Minimal Eigenvalues');
 eigVec = eigVec * diag(1./sum(eigVec,1))';
 
 % ======= Display original image ======= %
-display(eigVal);
+if output
+    % Plot input segmented image (color overlay)
+    subplot(2,(numCuts+2)/2,2); 
+    imshowSegments(bigImg, currentSegmentation);
+    title('Input');
+    freezeColors;
+end
 
-% Height of subplot
-h = (sEigs+2)/2;
-
-% figure
-% subplot(2,h,1); imshowMasked(img, 1-mask);
-% colormap(gray);
-% freezeColors;
+if output
+    display(eigVal);
+end
 
 % ======= Display cut eigenvectors ======= %
 % Cut out each eigenvector by mask.
-
 % Save cut values here.
-cuts = zeros(sEigs,1);
-maxID = max(max(max(currentSegmentation)));
-for v = 1:sEigs
+cuts = zeros(numCuts,1);
+% subMask = mask - 1;
+for v = 1:numCuts
     
     evec = eigVec(:,v);
 
     if ~CheckStability(evec)
+        stop = true;
        break; 
     end
     
-    % Compute maximal absolute value for colormapping.
-    eMax = max( max(evec), -min(evec) );
-    
     % Refill to full image.
-    fullImg = mask;
-    fullImg(mask>0) = evec;
-    fullImg(mask<=0) = -10;
+    fullImg = maskNew;
+    fullImg(fullImg>0) = evec;
+    fullImg(fullImg<=0) = -10;
     
     % Compute the optimal cut value and build a colormap from it.
     cuts(v) = OptimizeNcut(graph, evec);
     
-    subMask = mask;
-%     subMask(mask < cuts(v)) = 0;
+    % Update this sub-mask
+%     subMask = subMask * 2;
+%     subMask(fullImg > cuts(v)) = subMask(fullImg > cuts(v)) + 1;
+    
+    % Update segmentation
     segmentation = segmentation *2;
     segmentation(fullImg > cuts(v)) = segmentation(fullImg > cuts(v)) + 1; % = maxID + v;
+
+    % Intermediate segmentation result.
+    if output
+        % Plot input segmented image (color overlay)
+        subplot(2,(numCuts+2)/2,v+2); 
+        imshowSegments(bigImg, segmentation);
+        title(['Cut ' num2str(v)]);
+        freezeColors;
+    end
+
 end
 
-segmentation(segmentation<0) = -1;
+% % subMask(subMask<0) = -1;
+% % maskNew = zeros(size(fullImg));
+% % maskNew(minBox(1):maxBox(1), minBox(2):maxBox(2))
+% segNew(maskNew>0) = segmentation(mask>0);
+
+
+
+% segmentation(segmentation<0) = -1;
+
 % % Split to segments.
 % segs = zeros(size(eigVec(:,1)));
 % 
