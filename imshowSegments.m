@@ -11,25 +11,27 @@ function imshowSegments( img, segments)
     end
     
     % Some important variables.
-    maxVal = max(max(max(img)));
-    minVal = min(min(min(img)));
+    maxVal = max(max(max(img)))+20; % Offset to circumvent wrong interpolation at cuts.
+    img(img < 0) = 0;
     numSegs = max(max(max(segments)));
-    imshow(img+segments*maxVal, [minVal numSegs*maxVal]);
+    imshow(img+segments*maxVal+10, [0 (numSegs+1)*maxVal]);
     
     % Normal grey map, linear
     halfMap = [linspace(0,1,128)' linspace(0,1,128)' linspace(0,1,128)'
-               zeros(128*numSegs, 3)];
+               zeros(128*max(numSegs-1,0), 3)];
     
     % For each segment ID, add the colormap with a random color.
-    colors = jet(numSegs);
-    for s=1:numSegs
+    colors = jet(numSegs+1);
+    for s=0:numSegs
+        % Some green pixels to find errors in mapping.
+        % As long as you don't see them, everything is fine.
+        halfMap((s*128+1):(s*128+7), : ) = repmat([0 1 0], 7,1);
         halfMap( ((s)*128+1):((s+1)*128), : ) = ...
-            [linspace(0.1,0.8,128)' linspace(0.1,0.8,128)' linspace(0.1,0.8,128)'] * diag(colors(s,:));
+            [linspace(0.1,0.8,128)' linspace(0.1,0.8,128)' linspace(0.1,0.8,128)'] * diag(colors(s+1,:));
     end
            
     colormap(halfMap);
-    
-%     figure;
-%     imshow(reshape(halfMap,128, numSegs+1,3)); 
+    colorbar;
+    freezeColors;
 end
 

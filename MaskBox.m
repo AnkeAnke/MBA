@@ -28,6 +28,9 @@ sums = mask;
         
         % Get all 'rows' where at least one value is positive.
         positions = positions(sums>0);
+        if numel(positions) == 0
+            display('nope.');
+        end
         minBox(d) = positions(1);
         maxBox(d) = positions(end);
     end
