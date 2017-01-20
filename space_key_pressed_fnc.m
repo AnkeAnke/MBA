@@ -3,11 +3,11 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
     if strcmp(get(figureObject, 'CurrentKey'),'space')
         % Get the structure using guidata in the local function
         myhandles = guidata(gcbo);
-        index = myhandles.scrollViewIndex+1;
-        resultMask=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,index)), uint16(dcmImgsT2(:,:,index)) );
+        sliceIndex = myhandles.scrollViewIndex+1;
+        resultMask=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,sliceIndex)), uint16(dcmImgsT2(:,:,sliceIndex)) );
         %close(figureObject);
         
-        %MaskDebugHelperFnc(dcmImgsT1,dcmImgsT2,resultMask, index);
+        %MaskDebugHelperFnc(dcmImgsT1, dcmImgsT2, resultMask, sliceIndex);
         
         %figure;
         %imshow(max(dcmImgsT2(:)/2.0)*uint16(dcmImgsT2(:,:,myhandles.scrollViewIndex+1)));
@@ -16,9 +16,10 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         %imshow(uint16(resultMask).*(max(dcmImgsT2(:)/2.0)*uint16(dcmImgsT2(:,:,myhandles.scrollViewIndex+1))));
         
         %Call here the normalized graph cut segmentation.
-        img = (dcmImgsT2(:,:,index));
+        %img = (dcmImgsT2(:,:,sliceIndex));
 
         % If we have a better "hole indicator", exchange the parameter.
-        result3D = NormCutSegmentation(dcmImgsT2, resultMask, 8, 30); 
+        result3D = NormCutSegmentation(dcmImgsT2, resultMask, 8, 30);
+        size(result3D)
     end
 end
