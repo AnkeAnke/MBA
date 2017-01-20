@@ -2,6 +2,7 @@ function [result] = NormCutSegmentation( img, mask, neighborhood, minval )
 %NORMCUTSEGMENTATION Segment the image recursively
 %   Split the image in half using normalized cuts. Reinitialize the 
 numSlices = size(img,3);
+imgOld = img;
 if ndims(img) == 3
     img  =  img(:,:,1);
     mask = mask(:,:,1);
@@ -81,7 +82,9 @@ imshowMasked(img, result);
 title('Resulting Segmentation');
 freezeColors;
 
-result = repmat(result,1,1,numSlices);
+resFull = zeros(size(imgOld));
+resFull(minBox(1):maxBox(1), minBox(2):maxBox(2)) = result;
+result = repmat(resFull,1,1,numSlices);
 
 end
 
