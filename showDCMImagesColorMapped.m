@@ -19,15 +19,10 @@ function showDCMImagesColorMapped(~,eventData,dcmImgs,masks,maxIndex)
     myhandles.scrollViewIndex = scrollViewIndex;
     % Save the change you made to the structure
     guidata(gcbo,myhandles);
-    
-    img = dcmImgs(:,:,scrollViewIndex+1) + masks(:,:,scrollViewIndex+1)*max(max(dcmImgs(:,:,scrollViewIndex+1)));
-    imshow(img, [min(min(img)), max(max(img))] );
-    
+
+    img = dcmImgs(:,:,scrollViewIndex+1);
+    mask = masks(:,:,scrollViewIndex+1);
+    imshowMasked( img, mask );
     title(sprintf('Current DCM Image Index: %d',scrollViewIndex));
-    
-    halfMap = [linspace(0,1,128)' linspace(0,1,128)' linspace(0,1,128)'
-               linspace(0.2,1,128)' linspace(0,1,128)' linspace(0,1,128)'];
-    colormap(halfMap);
-    colorbar;
 end
 
