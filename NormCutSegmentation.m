@@ -82,7 +82,7 @@ imshowMasked(img, result);
 title('Resulting Segmentation');
 freezeColors;
 
-resFull = zeros(size(imgOld));
+resFull = zeros(size(imgOld,1), size(imgOld,2));
 resFull(minBox(1):maxBox(1), minBox(2):maxBox(2)) = result;
 result = repmat(resFull,1,1,numSlices);
 

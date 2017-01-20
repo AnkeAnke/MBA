@@ -20,6 +20,7 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
 
         % If we have a better "hole indicator", exchange the parameter.
         result3D = NormCutSegmentation(dcmImgsT2, resultMask, 8, 30);
-        size(result3D)
+        
+        imSeriesShowMasked( dcmImgsT2, result3D, sliceIndex );
     end
 end
