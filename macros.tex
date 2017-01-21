@@ -1,0 +1,256 @@
+\let\Cross\relax
+\usepackage{cool}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% LaTeX math macros
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\mySetNotation}[1]{{\mathbb{#1}}}
+\newcommand{\RRSet}{{\mySetNotation{R}}}
+\newcommand{\EESet}{{\mySetNotation{E}}}
+\newcommand{\NNSet}{{\mySetNotation{N}}}
+\newcommand{\QQSet}{{\mySetNotation{Q}}}
+\newcommand{\ZZSet}{{\mySetNotation{Z}}}
+\newcommand{\RRR}{{\mySetNotation{R}}}
+
+
+\newcommand{\myBoldNotation}[1]{{\mathbf #1}}
+%\newcommand{\myBoldNotation}[1]{{\mathbold{#1}}} %for euler math
+\newcommand{\va}   {{\myBoldNotation{a}}}
+\newcommand{\vb}   {{\myBoldNotation{b}}}
+\newcommand{\vc}   {{\myBoldNotation{c}}}
+\newcommand{\vd}   {{\myBoldNotation{d}}}
+\newcommand{\ve}   {{\myBoldNotation{e}}}
+\newcommand{\vf}   {{\myBoldNotation{f}}}
+\newcommand{\vg}   {{\myBoldNotation{g}}}
+\newcommand{\vh}   {{\myBoldNotation{h}}}
+\newcommand{\vi}   {{\myBoldNotation{i}}}
+\newcommand{\vj}   {{\myBoldNotation{j}}}
+\newcommand{\vk}   {{\myBoldNotation{k}}}
+\newcommand{\vl}   {{\myBoldNotation{l}}}
+\newcommand{\vm}   {{\myBoldNotation{m}}}
+\newcommand{\vn}   {{\myBoldNotation{n}}}
+\newcommand{\nn}   {{\myBoldNotation{n}}}
+\newcommand{\vo}   {{\myBoldNotation{o}}}
+\newcommand{\vp}   {{\myBoldNotation{p}}}
+\newcommand{\pp}   {{\myBoldNotation{p}}}
+\newcommand{\vq}   {{\myBoldNotation{q}}}
+\newcommand{\vr}   {{\myBoldNotation{r}}}
+\newcommand{\vs}   {{\myBoldNotation{s}}}
+\newcommand{\vt}   {{\myBoldNotation{t}}}
+\newcommand{\vu}   {{\myBoldNotation{u}}}
+\newcommand{\vv}   {{\myBoldNotation{v}}}
+\newcommand{\vw}   {{\myBoldNotation{w}}}
+\newcommand{\vx}   {{\myBoldNotation{x}}}
+\newcommand{\vy}   {{\myBoldNotation{y}}}
+\newcommand{\vz}   {{\myBoldNotation{z}}}
+\newcommand{\vNull}{{\myBoldNotation{0}}}
+\newcommand{\vOne} {{\myBoldNotation{1}}}
+
+\newcommand{\mA}   {{\myBoldNotation{A}}}
+\newcommand{\mB}   {{\myBoldNotation{B}}}
+\newcommand{\mC}   {{\myBoldNotation{C}}}
+\newcommand{\mD}   {{\myBoldNotation{D}}}
+\newcommand{\mE}   {{\myBoldNotation{E}}}
+\newcommand{\mF}   {{\myBoldNotation{F}}}
+\newcommand{\mG}   {{\myBoldNotation{G}}}
+\newcommand{\mH}   {{\myBoldNotation{H}}}
+\newcommand{\mI}   {{\myBoldNotation{I}}}
+\newcommand{\mJ}   {{\myBoldNotation{J}}}
+\newcommand{\mK}   {{\myBoldNotation{K}}}
+\newcommand{\mL}   {{\myBoldNotation{L}}}
+\newcommand{\mM}   {{\myBoldNotation{M}}}
+\newcommand{\mN}   {{\myBoldNotation{N}}}
+\newcommand{\mO}   {{\myBoldNotation{O}}}
+\newcommand{\mP}   {{\myBoldNotation{P}}}
+\newcommand{\mQ}   {{\myBoldNotation{Q}}}
+\newcommand{\mR}   {{\myBoldNotation{R}}}
+\newcommand{\mS}   {{\myBoldNotation{S}}}
+\newcommand{\mT}   {{\myBoldNotation{T}}}
+\newcommand{\mU}   {{\myBoldNotation{U}}}
+\newcommand{\mV}   {{\myBoldNotation{V}}}
+\newcommand{\mW}   {{\myBoldNotation{W}}}
+\newcommand{\mX}   {{\myBoldNotation{X}}}
+\newcommand{\mY}   {{\myBoldNotation{Y}}}
+\newcommand{\mZ}   {{\myBoldNotation{Z}}}
+\newcommand{\mNull}{{\myBoldNotation{0}}}
+\newcommand{\mOmega}   {{\myBoldNotation{\Omega}}}
+
+\newcommand{\myBoldGreekNotationLower}[1]{{\bm{#1}}}
+\newcommand{\myBoldGreekNotationUpper}[1]{{\bm{#1}}}
+\newcommand{\balpha}  {{\myBoldGreekNotationLower{\alpha}  }}
+\newcommand{\bbeta}   {{\myBoldGreekNotationLower{\beta}   }}
+\newcommand{\bgamma}  {{\myBoldGreekNotationLower{\gamma}  }}
+\newcommand{\bdelta}  {{\myBoldGreekNotationLower{\delta}  }}
+\newcommand{\bepsilon}{{\myBoldGreekNotationLower{\epsilon}}}
+\newcommand{\bzeta}   {{\myBoldGreekNotationLower{\zeta}   }}
+\newcommand{\btheta}  {{\myBoldGreekNotationLower{\theta}  }}
+\newcommand{\biota}   {{\myBoldGreekNotationLower{\iota}   }}
+\newcommand{\bkappa}  {{\myBoldGreekNotationLower{\kappa}  }}
+\newcommand{\blambda} {{\myBoldGreekNotationLower{\lambda} }}
+\newcommand{\bmu}     {{\myBoldGreekNotationLower{\mu}     }}
+\newcommand{\bnu}     {{\myBoldGreekNotationLower{\nu}     }}
+\newcommand{\bxi}     {{\myBoldGreekNotationLower{\xi}     }}
+\newcommand{\bomicron}{{\myBoldGreekNotationLower{\omicron}}}
+\newcommand{\bpi}     {{\myBoldGreekNotationLower{\pi}     }}
+\newcommand{\brho}    {{\myBoldGreekNotationLower{\rho}    }}
+\newcommand{\bsigma}  {{\myBoldGreekNotationLower{\sigma}  }}
+\newcommand{\btau}    {{\myBoldGreekNotationLower{\tau}    }}
+\newcommand{\bupsilon}{{\myBoldGreekNotationLower{\upsilon}}}
+\newcommand{\bphi}    {{\myBoldGreekNotationLower{\phi}    }}
+\newcommand{\bchi}    {{\myBoldGreekNotationLower{\chi}    }}
+\newcommand{\bpsi}    {{\myBoldGreekNotationLower{\psi}    }}
+\newcommand{\bomega}  {{\myBoldGreekNotationLower{\omega}  }}
+
+\newcommand{\mLambda} {\Lambda}
+\newcommand{\mSigma} {\Sigma}
+
+\newcommand{\bGamma}  {{\myBoldGreekNotationUpper{\Gamma}  }}
+\newcommand{\bDelta}  {{\myBoldGreekNotationUpper{\Delta}  }}
+\newcommand{\bTheta}  {{\myBoldGreekNotationUpper{\Theta}  }}
+\newcommand{\bLambda} {{\myBoldGreekNotationUpper{\Lambda} }}
+\newcommand{\bXi}     {{\myBoldGreekNotationUpper{\Xi}     }}
+\newcommand{\bPi}     {{\myBoldGreekNotationUpper{\Pi}     }}
+\newcommand{\bSigma}  {{\myBoldGreekNotationUpper{\Sigma}  }}
+\newcommand{\bUpsilon}{{\myBoldGreekNotationUpper{\Upsilon}}}
+\newcommand{\bPhi}    {{\myBoldGreekNotationUpper{\Phi}    }}
+\newcommand{\bPsi}    {{\myBoldGreekNotationUpper{\Psi}    }}
+\newcommand{\bOmega}  {{\myBoldGreekNotationUpper{\Omega}  }}
+
+\newcommand{\inn}[2][0cm]{\mathopen{}\left|{#2}\parbox[h][#1]{0cm}{}\right|}
+\newcommand{\invn}[2][0cm]{\mathopen{}\left|\left|{#2}\parbox[h][#1]{0cm}{}\right|\right|}
+
+%\newcommand{\Sa}{{\mathbf {Sa}}}
+%\newcommand{\Topo}{{\mathbf {Topo}}}
+%\newcommand{\Sep}{{\mathbf {Sep}}}
+%\newcommand{\Str}{{\mathbf {Str}}}
+%\newcommand{\Reg}{{\mathbf {Reg}}}
+
+%\newcommand{\PPhi}{{\pmb \Phi}}
+%\newcommand{\PPi}{{\pmb \Pi}}
+%\newcommand{\PPhi}{{\bm \Phi}}
+%\newcommand{\PPi}{{\bm \Pi}}
+\newcommand{\PPhi}{{\Phi}}
+\newcommand{\PPi}{{\Pi}}
+\newcommand{\ppi}{{\pi}}
+\newcommand{\ggam}{{\gamma}}
+
+\newcommand{\cA}{{\mathcal A}}
+\newcommand{\cB}{{\mathcal B}}
+\newcommand{\cC}{{\mathcal C}}
+\newcommand{\cD}{{\mathcal D}}
+\newcommand{\cE}{{\mathcal E}}
+\newcommand{\cF}{{\mathcal F}}
+\newcommand{\cG}{{\mathcal G}}
+\newcommand{\cH}{{\mathcal H}}
+\newcommand{\cI}{{\mathcal I}}
+\newcommand{\cJ}{{\mathcal J}}
+\newcommand{\cK}{{\mathcal K}}
+\newcommand{\cL}{{\mathcal L}}
+\newcommand{\cM}{{\mathcal M}}
+\newcommand{\cN}{{\mathcal N}}
+\newcommand{\cO}{{\mathcal O}}
+\newcommand{\cP}{{\mathcal P}}
+\newcommand{\cQ}{{\mathcal Q}}
+\newcommand{\cR}{{\mathcal R}}
+\newcommand{\cS}{{\mathcal S}}
+\newcommand{\cT}{{\mathcal T}}
+\newcommand{\cU}{{\mathcal U}}
+\newcommand{\cV}{{\mathcal V}}
+\newcommand{\cW}{{\mathcal W}}
+\newcommand{\cX}{{\mathcal X}}
+\newcommand{\cY}{{\mathcal Y}}
+\newcommand{\cZ}{{\mathcal Z}}
+
+\newcommand{\ca}{{\mathcal a}}
+\newcommand{\cb}{{\mathcal b}}
+\newcommand{\cc}{{\mathcal c}}
+\newcommand{\cd}{{\mathcal d}}
+\newcommand{\ce}{{\mathcal e}}
+%\newcommand{\cf}{{\mathcal f}}
+\newcommand{\cg}{{\mathcal g}}
+\newcommand{\ch}{{\mathcal h}}
+\newcommand{\ci}{{\mathcal i}}
+\newcommand{\cj}{{\mathcal j}}
+%\newcommand{\ck}{{\mathcal k}}
+\newcommand{\cl}{{\mathcal l}}
+\newcommand{\cm}{{\mathcal m}}
+\newcommand{\cn}{{\mathcal n}}
+\newcommand{\co}{{\mathcal o}}
+\newcommand{\cp}{{\mathcal p}}
+\newcommand{\cq}{{\mathcal q}}
+%\newcommand{\cr}{{\mathcal r}}
+\newcommand{\cs}{{\mathcal s}}
+\newcommand{\ct}{{\mathcal t}}
+\newcommand{\cu}{{\mathcal u}}
+\newcommand{\cv}{{\mathcal v}}
+\newcommand{\cw}{{\mathcal w}}
+\newcommand{\cx}{{\mathcal x}}
+\newcommand{\cy}{{\mathcal y}}
+\newcommand{\cz}{{\mathcal z}}
+
+%cool package Styles
+\Style{IdentityMatrixSymb=\mI,%
+       DSymb={\mathrm d},%
+       IntegrateDifferentialDSymb={\mathrm d},%
+       TrParen=p,%
+       DetParen=p}
+\Style{DDisplayFunc=outset}
+\renewcommand{\Transpose}[1]{ {#1}^\Transp }
+\newcommand{\TransposeInv}[1]{ {#1}^{-\Transp} }
+\newcommand{\T}[1]{\Transpose{#1}}
+\newcommand{\TInv}[1]{\TransposeInv{#1}}
+\newcommand{\Inv}[1]{ {#1}^{-1} }
+\newcommand{\Transp}{{{\mathrm T}}}
+\newcommand{\Norm}[1]{\left\lVert#1\right\rVert}
+
+\newcommand{\Rank}[1]    {\operatorname{rank}\inp{#1}}
+\newcommand{\Vol}[1]     {\operatorname{vol}\inp{#1}}
+\renewcommand{\Vec}[1]   {\operatorname{vec}\inp{#1}}
+\renewcommand{\Div}[1]   {\T{\nabla} \, #1}
+\newcommand{\Diag}[1]    {\operatorname{diag}\inp{#1}}
+\newcommand{\Dim}[1]     {\operatorname{dim}\inp{#1}}
+\newcommand{\Diagof}[1]  {\operatorname{diag}^{-1}\inp{#1}}
+\newcommand*{\diff}{\mathop{}\!\mathrm{d}} %e.g. $F(x) = \int\!f(x)\diff x$
+\newcommand{\Argmin}[1]{\underset{#1}{\operatorname{argmin}} \;}
+\newcommand{\Maxof}[1]{\underset{#1}{\operatorname{max}} \;}
+\newcommand{\Minof}[1]{\underset{#1}{\operatorname{min}} \;}
+
+\providecommand{\e}[1]{\ensuremath{\cdot 10^{#1}}}
+
+%workaround for mathbold in cool, cf. http://tex.stackexchange.com/questions/97910
+%\let\oldmb\mathbold
+%\protected\def\mathbold{\oldmb}
+
+\newcommand{\CB} [1]{{\color{#1}     $\bullet$}}
+\newcommand{\CBB}[2]{{\color[#1]{#2} $\bullet$}}
+
+\newcommand{\ie}{i.e.}
+\newcommand{\Ie}{I.e.}
+\newcommand{\eg}{e.g.}
+\newcommand{\Eg}{E.g.}
+\newcommand{\cf}{cf.\ }
+\newcommand{\Cf}{Cf.\ }
+\newcommand{\etc}{etc.\ }
+\newcommand{\wrt}{w.r.t.\ }
+\newcommand{\Wrt}{W.r.t.\ }
+\newcommand{\Wlog}{W.l.o.g.\ }
+\newcommand{\resp}{resp.\ }
+\newcommand{\etal}{et al.\ }
+
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{definition}{Definition}
+% \newtheorem{expectation}{Expectation}
+% \newtheorem{problem}{Problem}
+% %\newtheorem{algorithm}{Algorithm}
+
+
+% http://tex.stackexchange.com/questions/145716/underbrace-in-a-matrix
+\newcommand{\underbracedmatrix}[2]{%
+  \left(\;
+  \smash[b]{\underbrace{
+    \begin{matrix}#1\end{matrix}
+  }_{#2}}
+  \;\right)
+  \vphantom{\underbrace{\begin{matrix}#1\end{matrix}}_{#2}}
+}

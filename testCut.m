@@ -2,6 +2,12 @@
 close all;
 clc;
 
+img = imgToGrey(imread('test.png'))*100;
+mask = double(imread('testmask.png'));
+mask(mask>0) = 1;
+NormCutSegmentation(img, mask(:,:,1), 8, 20, 'eigen');
+
+
 % This index contains the current index of a dicom image series.
 addpath('./Working_Data/T1');
 addpath('./Working_Data/T2');

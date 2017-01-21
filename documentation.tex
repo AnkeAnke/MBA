@@ -2,6 +2,8 @@
 
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{amsmath}
+\include{macros}
 
 \title{Bone Cement Volumetry in sagittal and axial MRT-Images of the Spine}
 
@@ -84,16 +86,74 @@
   
   Taking all this together, we decided to try \textit{Normalized Graph Cuts} as described by Shi and Malik~\cite{[ShiMalik00]} as segmentation algorithm.
   Basically, the image is represented as a non-directed, weighted graph, with pixels and inter-pixel similarities corresponding to nodes and weights respectively.
-  Representing the graph to a Laplacian matrix, we are able to compute the \textit{real-valued minimal cut} by solving for eigenvectors with corresponding minimal eigenvalues.
-  This reads 
-%  \begin{equation}
-%\begin{alignedat}{2}
-%    test &= \Omega + S\\
-%    test2 &= 0
-%\end{alignedat}
-%  \end{equation}
+  Representing the graph to a Laplacian matrix, we are able to compute the \textit{real-valued minimal normalized cut} by solving an eigenvector problem on a similarity graph.
   
-  \pagebreak
+  \subsection*{Normalized Graph Cut}
+    For computation, we set up
+    
+  \begin{equation*}
+  \begin{alignedat}{2}
+  \mW_{ij} &= w_{ij} \\
+  \mD_{ii} &= \sum_j w_{ij} .
+  \end{alignedat}
+  \end{equation*}
+  $\mW$ is the connectivity matrix, symmetric semi-positive definite by construction.
+  $\mD$ is a diagonal matrix storing the total connectivity per point.
+  The weights $w_{ij}$ are to be filled with a measure of similarity.
+  This is basically the only tunable parameter of the method.
+  
+  The \textit{normalized cut} of two segments A and B is defined as the connectivity between A and B, normalized by the total connectivity of each segment, or
+  \begin{equation}\label{eq:mincut}
+    \frac{\sum_{a \in A,b \ in B} w_{ab}}
+    {\sum_{a \in A, v \in A \cup B} w_{av}} + 
+      \frac{\sum_{a \in A,b \ in B} w_{ab}}
+      {\sum_{b \in B, v \in A \cup B} w_{bv}}
+  \end{equation}
+ 
+  
+  Based on $\mW$ and $\mD$, the \textit{real-valued minimal normalized cut} of the graph can be found by solving
+  \begin{equation}
+    (\mD-\mW) y = \lambda \mD y
+  \end{equation}
+  for minimal $y$, \ie by solving a Laplacian matrix for the eigenvector with the smallest corresponding eigenvalue (omitting the first eigenvector-eigenvalue pair, $\{\textbf{1}, 0\}$).
+  This $y_{min}$ will have the property of minimizing the total cut, where $1$ and $-1$ indicate the two segments.
+  %each value represents the affiliation to the $1$ or $-1$ segment.
+  To extract the optimal \textit{binary} segmentation from this field, Shi and Malik suggest to simply try out several threshold values on $y_{min}$ and applying the one minimizing equation \ref{eq:mincut}.
+  
+  \subsection*{Connectivity Matrix Setup}
+  As mentioned above, the only exchangeable parameter in the method is $w_{ij}$, the similarity between pixels.
+  We followed the example given by Shi and Malik. Within a set neighborhood, similarity is defined as difference in value divided by distance:
+  \begin{equation}
+    w_{ij} = \frac{1}{dist(i,j)}~
+    e^{\frac{-\Norm{X_i - X_j}^2}{\sigma^2_X}}
+  \end{equation}
+  where $X_i$ is the image value at position $i$ and $\sigma^2_X$ is the overall variance of all $X_i$.
+  We chose a neighborhood of up to $8$ pixels in each direction and up to $\lceil\frac{8}{6}\rceil=2$ slices to account for the difference in element distance.
+  More neighbors add more non-zero values to $\mW$, but do not increase its size. So, as solving becomes slower, it is also stabilized.
+  
+  \subsection{Iterative Segmentation}
+  As the matrices involved are symmetric, all eigenvalues are orthogonal.
+  This means that while the second smallest eigenvalue can be used to cut the area in half, the next eigenvectors cut the resulting segments optimally again.
+  Shi and Malik mention the instability of this approach.
+  Cuts become more expensive and less accurate the higher the eigenvalue gets.
+  
+  Taking this into account, we implemented 4 different possibilities for iterative segmentation:
+  \begin{enumerate}
+    \item
+    Using the $n$ smallest eigenvalues, the area is segmented into approximately $2^n$ segments.
+    This variant results in several small segments and performs worse the higher $n$ becomes.
+    For $n = 1$, only one cut is performed, which is the basis for the other versions.
+    \item
+    Instead of solving the system once for $n$ eigenvalues, we can also recursively subdivide the segments.
+    This basically means computing eigenvalues of a submatrix and evaluating equation \ref{eq:mincut} in a smaller area.
+    However, the segments will not always be of the same size, result in segments of highly varying size.
+    \item
+    To circumvent this problem, one can always split the segment with the highest area, until a certain segment size or iteration count is reached.
+    This however tends to cut uniform areas more often than necessary, while interesting areas tend to have a smaller area.
+    \item
+    In order to integrate this property, we decided to choose the segment with highest variance as splitting candidate.
+    To ignore high variances in higher image values, we clamp them to approximately double the highest cement value.
+  \end{enumerate}
   
   \section{Results}
   {
@@ -116,7 +176,6 @@
   \pagebreak
   \section{Evaluation}
   
-  \pagebreak
   
 	\begin{thebibliography}{9}
 	

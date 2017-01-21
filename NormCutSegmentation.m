@@ -1,6 +1,12 @@
-function [result] = NormCutSegmentation( img, mask, neighborhood, minval )
+function [result] = NormCutSegmentation( img, mask, neighborhood, minval, variant)
 %NORMCUTSEGMENTATION Segment the image recursively
 %   Split the image in half using normalized cuts. Reinitialize the 
+%   Possible variants: minvar, 
+
+if nargin < 5
+    variant = 'minvar'
+end
+
 numSlices = size(img,3);
 imgOld = img;
 if ndims(img) == 3
@@ -33,11 +39,18 @@ h = sEigs/2 + 1;
 currentSegmentation = mask - 1;
 currentMask = mask;
 
-   
-    %[segNew] = RecursiveCut(1, img, currentMask, neighborhood, minval, currentSegmentation, 2); 
-    %[segNew] = EqualSizedNormCut(img, currentMask, neighborhood, minval, currentSegmentation, 2); 
-    [segNew] = MinVarNormCut(img, currentMask, neighborhood, minval, currentSegmentation, 2); 
-    
+if strcmp(variant, 'recursive')
+    [segNew] = RecursiveCut(1, img, currentMask, neighborhood, minval, currentSegmentation, 2); 
+elseif strcmp(variant, 'equalarea')
+    [segNew] = EqualSizedNormCut(img, currentMask, neighborhood, minval, currentSegmentation, 2); 
+elseif strcmp(variant, 'minvar')
+    [segNew] = MinVarNormCut(img, currentMask, neighborhood, minval, currentSegmentation, 1); 
+elseif strcmp(variant, 'eigen')
+     [segNew] = normCut(img, currentMask, neighborhood, minval, currentSegmentation, 4, true); 
+else
+    display('Warning: no known variant! Aborting.');
+    return;
+end
     
     figure;
     imshowSegments(img, segNew+1);  
