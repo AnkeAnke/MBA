@@ -128,7 +128,7 @@ graph( :, ~any(graph,1) ) = [];  %columns
 
 if output
     figure
-    subplot(2,(numCuts+2)/2,1);
+    subplot(2,ceil((numCuts+2)/2),1);
     spy(graph)
 end
 
@@ -173,10 +173,9 @@ end
 % Save cut values here.
 cuts = zeros(numCuts,1);
 % subMask = mask - 1;
-for v = 1:numCuts
+for v = 1:numCuts%numCuts+1:-1:2
     
     evec = eigVec(:,v);
-
     if ~CheckStability(evec)
         stop = true;
        break; 
@@ -201,7 +200,7 @@ for v = 1:numCuts
     % Intermediate segmentation result.
     if output
         % Plot input segmented image (color overlay)
-        subplot(2,(numCuts+2)/2,v+2); 
+        subplot(2,ceil((numCuts+2)/2),v+2); 
         imshowSegments(bigImg, segmentation);
         title(['Cut ' num2str(v)]);
         freezeColors;

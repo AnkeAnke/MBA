@@ -43,7 +43,7 @@ for s = 1:5
             continue;
         end
         
-        sSeg = var(segNew(segNew==m));
+        sSeg = var(img(segNew==m));
 
         if sSeg > maxVar
            maxVar = sSeg;

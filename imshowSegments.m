@@ -21,7 +21,7 @@ function imshowSegments( img, segments)
                zeros(128*max(numSegs-1,0), 3)];
     
     % For each segment ID, add the colormap with a random color.
-    colors = jet(numSegs+1);
+    colors = jet(numSegs+1)*0.5 + 0.5;
     for s=0:numSegs
         % Some green pixels to find errors in mapping.
         % As long as you don't see them, everything is fine.

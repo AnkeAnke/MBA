@@ -4,7 +4,7 @@ function [ threshold ] = OptimizeNcut( graph, eigs, numTests )
 
     % Standard arg.
     if nargin < 3
-            numTests = 20;
+            numTests = 230;
     end    
     
     % Eigenvector to vector
@@ -13,7 +13,7 @@ function [ threshold ] = OptimizeNcut( graph, eigs, numTests )
     maxAbs = max(max(eig),-min(eig));
     
     % Sample some positions around zero.
-    tests = maxAbs * (rand(numTests, 1)*2 - 1);
+    tests = linspace(min(min(min(eig))), max(max(max(eig))), numTests);
     % ncuts = zeros(numTests,1);
     cut = inf;
     minIdx = 0;
