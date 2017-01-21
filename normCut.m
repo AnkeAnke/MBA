@@ -1,11 +1,11 @@
 function [segmentation,stop] = ...
-normCut( img, mask, neighborhood, minval, currentSegmentation, numCuts, output)
+normCut( img, mask, neighborhood, minval, currentSegmentation, viewSlice, numCuts)
 
 % ======= Standard Parameters ====== %
 % Set masked-out ares to nan.
 % This will invalidate all edges to and from this area.
 img(mask <= 0) = nan;
-
+output = true;
 % If no neighborhood value is given, take a small one.
 if nargin < 3
    neighborhood = 5;
@@ -21,16 +21,17 @@ if nargin < 5
    currentSegmentation = zeros(size(mask));
 end
 
-% If no cut number is given, take 2 for now (-> 4 segments each step)
+% If no viewing slice is specified, don't print debug output.
 if nargin < 6
+   output = false;
+end
+
+% If no cut number is given, take 2 for now (-> 4 segments each step)
+if nargin < 7
    numCuts = 2;
 end
 
-% If nothing is specified, don't print debug output.
-if nargin < 7
-   output = true;
-end
-
+anisotrophyZ = 6;
 % ======= Initialization ====== %
 
 segmentation = currentSegmentation;
@@ -48,30 +49,34 @@ mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
 sImg = size(img);
 sX = sImg(1);
 sY = sImg(2);
-sSqr = sImg(1) * sImg(2);
+sZ = sImg(2);
+sSqr = prod(sImg);
 
-% Number of elements in mask.
-% sMask = sum(sum(mask > 0));
 mask = double(mask);
-% mask(mask>0) = 1:sMask;
 
-indexImg = reshape(1:sSqr, sX, sY);
+indexImg = reshape(1:sSqr, sX, sY, sZ);
 
 % Minus middle, only compute half the entries (rest in transposed)
-numN = ((2*neighborhood+1) * (2*neighborhood+1) - 1)/2;
-nX = zeros(numN,1);
-nY = zeros(numN,1);
+numN = ((2*neighborhood+1)^2 - 1)/2;
 
+% Add third dimension.
+zNeigh = ceil(neighbor/anisotrophyZ);
+numN = numN + (2*neighborhood+1)^2 * zNeigh;
+
+% Save coordinates here.
+neighs = zeros(numN, 3);
 % ======= Build Connectivity Graph ====== %
 
 % Slow but small: Get all indices of neighbors.
 count = 1;
 for x = -neighborhood:neighborhood
     for y = -neighborhood:neighborhood
-        if (x > 0) || (x == 0 && y > 0)
-           nX(count) = x;
-           nY(count) = y;
-           count = count + 1;
+        for z = -zNeigh:zNeigh
+            if (z>0) ||(z==0) && ...
+                      ((x > 0) || (x == 0 && y > 0))
+               neighs(count) = [x y z]';
+               count = count + 1;
+            end
         end
     end
 end 
@@ -85,30 +90,39 @@ variance = var(img(mask > 0));
 
 % Fill with submatrices and compute connectivity.
 for neigh = 1:numN
-   x = nX(neigh);
-   y = nY(neigh);
+   [x,y,z] = neighs(neigh);
    
+   % When we have negative offsets, the direction needs to change.
    if y>=0
-       s0x = 1:sX-x;
        s0y = 1:sY-y;
-       s1x = x+1:sX;
        s1y = y+1:sY;
    else
-       s0x = 1:sX-x;
        s0y = 1-y:sY;
-       s1x = x+1:sX;
        s1y = 1:sY+y;
    end
+   % Same for x (in neighboring z slices).
+   if x>=0
+       s0x = 1:sX-x;
+       s1x = x+1:sX;
+   else
+       s0x = 1-x:sX;
+       s1x = 1:sX+x;
+   end
    
-   conn = (img(s0x,s0y) - img(s1x,s1y));
+   % z is always positive or zero.
+   s0z = 1:sZ-z;
+   s1z = z+1:sZ;
+   
+   conn = (img(s0x,s0y,s0z) - img(s1x,s1y,s1z));
    % Shi & Malik paper
    conn = exp(-(conn .* conn)/variance);
-   % Shi & Malik paper uses differently
-   conn = conn / sqrt(x*x + y*y);
+   % Shi & Malik paper normalizes this by the size variance.
+   % Anisotropic voxels: 6 times as large in z as in x or y.
+   conn = conn / sqrt(x*x + y*y + (z*anisotrophyZ)^2);
   
     % All x/y combinations.
-    so0 = indexImg(s0x, s0y);
-    so1 = indexImg(s1x, s1y);
+    so0 = indexImg(s0x, s0y, s0z);
+    so1 = indexImg(s1x, s1y, s1z);
 
    % Add to graph.
    graph = graph + sparse( ...
@@ -163,7 +177,7 @@ eigVec = eigVec * diag(1./sum(eigVec,1))';
 if output
     % Plot input segmented image (color overlay)
     subplot(sImg(1), sImg(2) ,2); 
-    imshowSegments(bigImg, currentSegmentation);
+    imshowSegments(bigImg(:,:,viewSlice), currentSegmentation(:,:,viewSlice));
     title('Input');
     freezeColors;
 end
@@ -193,9 +207,6 @@ for v = 1:numCuts%numCuts+1:-1:2
     % Compute the optimal cut value and build a colormap from it.
     cuts(v) = OptimizeNcut(graph, evec);
     
-    % Update this sub-mask
-%     subMask = subMask * 2;
-%     subMask(fullImg > cuts(v)) = subMask(fullImg > cuts(v)) + 1;
     
     % Update segmentation
     segmentation = segmentation *2;
@@ -205,39 +216,12 @@ for v = 1:numCuts%numCuts+1:-1:2
     if output
         % Plot input segmented image (color overlay)
         subplot(sImg(1), sImg(2) ,v+2);
-        imshowSegments(bigImg, segmentation);
+        imshowSegments(bigImg(:,:,viewSlice), segmentation(:,:,viewSlice));
         title(['Cut ' num2str(v)]);
         freezeColors;
     end
 
 end
-
-% % subMask(subMask<0) = -1;
-% % maskNew = zeros(size(fullImg));
-% % maskNew(minBox(1):maxBox(1), minBox(2):maxBox(2))
-% segNew(maskNew>0) = segmentation(mask>0);
-
-
-
-% segmentation(segmentation<0) = -1;
-
-% % Split to segments.
-% segs = zeros(size(eigVec(:,1)));
-% 
-% % Binary representation as ID. Map to color for viewing.
-% for i = 1:sEigs
-%     segs(eigVec(:,i) > cuts(i)) = segs(eigVec(:,i) > cuts(i)) + 2^(i-1);
-% end
-
-% Display segments.
-% fullImg = mask;
-% fullImg(mask > 0) = segs;
-
-% Plot segmented image (color overlay)
-% subplot(2,h,2*h); 
-% imshowSegments(original, fullImg); %imshow(fullImg, [0,size(map,1)]);
-% title('Segments');
-% freezeColors;
 
 end
 

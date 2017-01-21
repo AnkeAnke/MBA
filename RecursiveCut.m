@@ -1,4 +1,4 @@
-function [segNew] = RecursiveCut(depth, img, mask, neighborhood, minval, currentSegmentation, numCuts )
+function [segNew] = RecursiveCut(depth, img, mask, neighborhood, minval, currentSegmentation, viewSlice, numCuts )
 %RECURSIVECUT Recursively cut the image.
 %   Input: Number of subdivisions per step. Default: 2
 
@@ -9,12 +9,17 @@ end
 
 % Default: Cut into 4 pieces.
 if nargin < 7
+    viewSlice = 1;
+end
+
+% Default: Cut into 4 pieces.
+if nargin < 8
     numCuts = 1;
 end
 
 
 % One step.
-[segNew, stop] = normCut(img,mask,neighborhood,minval, currentSegmentation, numCuts);
+[segNew, stop] = normCut(img,mask,neighborhood,minval, currentSegmentation, viewSlice, numCuts);
 maxMask = max(max(max(segNew)));
 
 if stop

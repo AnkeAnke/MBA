@@ -1,4 +1,4 @@
-function imshowSegments( img, segments)
+function imshowSegments(img, segments, slice)
 %IMSHOWSEGMENTS Show the image colored by segments. Random colormap.
     
 % Assume 2D image or 3D image with slice chosen.
@@ -7,7 +7,8 @@ function imshowSegments( img, segments)
     end
 
     if nargin == 3
-        img = img(slice);
+        img = img(:,:,slice);
+        segments = segments(:,:,slice);
     end
     
     % Some important variables.

@@ -11,7 +11,8 @@ function imshowMasked( img, mask, slice )
     end
 
     if nargin == 3
-        img = img(slice);
+        img = img(:,:,slice);
+        mask = mask(:,:,slice);
     end
     
     img = double(img);
