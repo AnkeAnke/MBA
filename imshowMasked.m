@@ -14,9 +14,12 @@ function imshowMasked( img, mask, slice )
         img = img(slice);
     end
     
+    img = double(img);
+    mask = double(mask);
+    
     maxVal = max(max(max(img)));
-    minVal = min(min(min(img)));
-    imshow(img+mask*maxVal, [minVal 2*maxVal]);
+    
+    imshow(img+mask*maxVal, [0 2*maxVal]);
     halfMap = [linspace(0,1,128)' linspace(0,1,128)' linspace(0,1,128)'
                linspace(0.2,1,128)' linspace(0,1,128)' linspace(0,1,128)'];
     colormap(halfMap);

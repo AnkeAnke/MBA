@@ -4,15 +4,20 @@ function [result] = NormCutSegmentation( img, mask, neighborhood, minval, varian
 %   Possible variants: minvar, 
 
 if nargin < 5
-    variant = 'minvar'
+    variant = 'minvar';
 end
 
 numSlices = size(img,3);
 imgOld = img;
 if ndims(img) == 3
-    img  =  img(:,:,1);
-    mask = mask(:,:,1);
+    img  =  img(:,:,ceil(size(img,3)/2) );
+    mask = mask(:,:,ceil(size(img,3)/2));
 end
+
+% ===== Filter Image ===== %
+% Emphasize the calue region around the minval, where we expect the cement.
+% Map to qurtic root.
+% img = sqrt(img);
 
 figure;
 subplot(1,2,1); imshowMasked(img, mask);
@@ -40,9 +45,9 @@ currentSegmentation = mask - 1;
 currentMask = mask;
 
 if strcmp(variant, 'recursive')
-    [segNew] = RecursiveCut(1, img, currentMask, neighborhood, minval, currentSegmentation, 2); 
+    [segNew] = RecursiveCut(1, img, currentMask, neighborhood, minval, currentSegmentation, 1); 
 elseif strcmp(variant, 'equalarea')
-    [segNew] = EqualSizedNormCut(img, currentMask, neighborhood, minval, currentSegmentation, 2); 
+    [segNew] = EqualSizedNormCut(img, currentMask, neighborhood, minval, currentSegmentation, 1); 
 elseif strcmp(variant, 'minvar')
     [segNew] = MinVarNormCut(img, currentMask, neighborhood, minval, currentSegmentation, 1); 
 elseif strcmp(variant, 'eigen')

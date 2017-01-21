@@ -22,6 +22,9 @@ function imshowSegments( img, segments)
     
     % For each segment ID, add the colormap with a random color.
     colors = jet(numSegs+1)*0.5 + 0.5;
+    % Interleave colors.
+    % One cut always changes the ID by 1, do this to hichen the contrast.
+    colors(2:2:numSegs+1, :) = colors(2*floor((numSegs+1)/2):-2:2, :);
     for s=0:numSegs
         % Some green pixels to find errors in mapping.
         % As long as you don't see them, everything is fine.
@@ -31,7 +34,6 @@ function imshowSegments( img, segments)
     end
            
     colormap(halfMap);
-    colorbar;
     freezeColors;
 end
 

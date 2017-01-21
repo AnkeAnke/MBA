@@ -155,6 +155,11 @@
     To ignore high variances in higher image values, we clamp them to approximately double the highest cement value.
   \end{enumerate}
   
+  As we can reuse the system matrix in all cases, they are not considerably different in computational complexion.
+  The first version is the most simple and slightly faster (as we do not need to partition the system and only once split non-connected regions with the same segment ID).
+  The recursive variant is outperformed by both the equal area and minimal variance criterion.
+  We further observed the cement regions to be rather small compared to the complete vertebra, and thus favor the fourth variance-based approach.
+  
   \section{Results}
   {
   \begin{figure}[h]

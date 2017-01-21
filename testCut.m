@@ -2,10 +2,10 @@
 close all;
 clc;
 
-img = imgToGrey(imread('test.png'))*100;
-mask = double(imread('testmask.png'));
-mask(mask>0) = 1;
-NormCutSegmentation(img, mask(:,:,1), 8, 20, 'eigen');
+% img = imgToGrey(imread('test.png'))*100;
+% mask = double(imread('testmask.png'));
+% mask(mask>0) = 1;
+% NormCutSegmentation(img, mask(:,:,1), 8, 20, 'minvar');
 
 
 % This index contains the current index of a dicom image series.
@@ -26,6 +26,7 @@ dcmImgsT1 = [];
 dcmImgsT2 = [];
 dcmImgSize = [0 0];
 maxIndex = 0;
+%         thresheldDcmImgsT2=(uint16(dcmImgsT2), threshold);
 for i=1:length(dcmFileListingT1)
     index=strfind(dcmFileListingT1(i).name,'.0.dcm');
     if ~isempty(index)
@@ -50,7 +51,7 @@ intitaldcmIndex=0;
 initialDCMImg = max(dcmImgsT2(:)/2.0)*uint16(dcmImgsT2(:,:,intitaldcmIndex+1));
 
 figureHandle=figure;
-imshow(initialDCMImg);
+imshow(initialDCMImg, [min(min(initialDCMImg)), max(max(initialDCMImg))] );
 title(sprintf('Current DCM Image Index: %d',intitaldcmIndex));
 
 % create structure of handles

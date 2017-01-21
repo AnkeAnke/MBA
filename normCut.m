@@ -102,7 +102,7 @@ for neigh = 1:numN
    
    conn = (img(s0x,s0y) - img(s1x,s1y));
    % Shi & Malik paper
-   conn = exp((conn .* conn)/variance);
+   conn = exp(-(conn .* conn)/variance);
    % Shi & Malik paper uses differently
    conn = conn / sqrt(x*x + y*y);
   
@@ -127,8 +127,12 @@ graph( ~any(graph,2), : ) = [];  %rows
 graph( :, ~any(graph,1) ) = [];  %columns
 
 if output
+    sImg = [1 numCuts+2];
+    if numCuts > 2
+        sImg = [2 ceil((numCuts+2)/2)];
+    end
     figure
-    subplot(2,ceil((numCuts+2)/2),1);
+    subplot(sImg(1), sImg(2) ,1);
     spy(graph)
 end
 
@@ -158,7 +162,7 @@ eigVec = eigVec * diag(1./sum(eigVec,1))';
 % ======= Display original image ======= %
 if output
     % Plot input segmented image (color overlay)
-    subplot(2,(numCuts+2)/2,2); 
+    subplot(sImg(1), sImg(2) ,2); 
     imshowSegments(bigImg, currentSegmentation);
     title('Input');
     freezeColors;
@@ -200,7 +204,7 @@ for v = 1:numCuts%numCuts+1:-1:2
     % Intermediate segmentation result.
     if output
         % Plot input segmented image (color overlay)
-        subplot(2,ceil((numCuts+2)/2),v+2); 
+        subplot(sImg(1), sImg(2) ,v+2);
         imshowSegments(bigImg, segmentation);
         title(['Cut ' num2str(v)]);
         freezeColors;
