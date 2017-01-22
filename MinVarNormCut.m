@@ -7,7 +7,7 @@ if nargin < 7
     numCuts = 1;
 end
 if nargin < 8
-    numIterations = 5;
+    numIterations = 3;
 end
 
 

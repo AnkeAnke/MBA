@@ -25,10 +25,10 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         % If we have a better "hole indicator", exchange the parameter.
         [mask3D,seg3D] = NormCutSegmentation(dcmImgsT2, resultMask, 2, 30, sliceIndex, 'minvar');
         
-        segments3D=[];
-        maxIndex=size(segments3D,3);
-        segmentImgSize=[size(segments3D,1) size(segments3D,2)];
-        set(figureHandle,'windowscrollWheelFcn', {@showImagesSegmented,segments3D,segmentImgSize,maxIndex});
+%         segments3D=[];
+%         maxIndex=size(segments3D,3);
+        figureHandle = figure;
+        set(figureHandle,'windowscrollWheelFcn', {@showImagesSegmented,dcmImgsT2,seg3D});
         %imSeriesShowMasked( dcmImgsT2, result3D, sliceIndex );
         %imSeriesShowMasked( thresheldDcmImgsT2, result3D, sliceIndex );
     end

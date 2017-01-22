@@ -1,6 +1,10 @@
 %color map hard coded.
 function showImagesSegmented(~,eventData,dcmImgs,segments,maxIndex)
 
+    if nargin < 5
+       maxIndex = size(segments,3); 
+    end
+
     persistent scrollViewIndex;
     
     if isempty(scrollViewIndex)
