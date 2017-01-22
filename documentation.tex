@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{amsmath}
+\usepackage{todonotes}
 \include{macros}
 
 \title{Bone Cement Volumetry in sagittal and axial MRT-Images of the Spine}
@@ -18,7 +19,7 @@
   
   \maketitle
   \thispagestyle{empty}
-  \pagebreak
+%  \pagebreak
   
   \section{Introduction}
   \setcounter{page}{1}
@@ -49,7 +50,7 @@
     At last in the remaining two chapters we will present our results and evaluate them, to see how well our application fare against the ground truth solution.
     on MR-images of a spline.
   }
-  \pagebreak
+%  \pagebreak
   \section{Vertebra Segmentation}
   {
     The implementation of the vertebra segmentation makes solely use of features and algorithms
@@ -84,7 +85,7 @@
     \end{figure} 
   }	
   
-  \pagebreak
+%  \pagebreak
   \section{Filling Compound Segmentation}
   
   Within this rough segmentation of the vertebra body, we now search for the bone cement structures.
@@ -123,7 +124,7 @@
   \begin{equation}
     (\mD-\mW) y = \lambda \mD y
   \end{equation}
-  for minimal $y$, \ie by solving a Laplacian matrix for the eigenvector with the smallest corresponding eigenvalue (omitting the first eigenvector-eigenvalue pair, $\{\textbf{1}, 0\}$).
+  for minimal $y$, \ie~by solving a Laplacian matrix for the eigenvector with the smallest corresponding eigenvalue (omitting the first eigenvector-eigenvalue pair, $\{\textbf{1}, 0\}$).
   This $y_{min}$ will have the property of minimizing the total cut, where $1$ and $-1$ indicate the two segments.
   %each value represents the affiliation to the $1$ or $-1$ segment.
   To extract the optimal \textit{binary} segmentation from this field, Shi and Malik suggest to simply try out several threshold values on $y_{min}$ and applying the one minimizing equation \ref{eq:mincut}.
@@ -151,6 +152,7 @@
     Using the $n$ smallest eigenvalues, the area is segmented into approximately $2^n$ segments.
     This variant results in several small segments and performs worse the higher $n$ becomes.
     For $n = 1$, only one cut is performed, which is the basis for the other versions.
+    For a simple example, see figure~\ref{fig:eigen}.
     \item
     Instead of solving the system once for $n$ eigenvalues, we can also recursively subdivide the segments.
     This basically means computing eigenvalues of a submatrix and evaluating equation \ref{eq:mincut} in a smaller area.
@@ -161,36 +163,162 @@
     \item
     In order to integrate this property, we decided to choose the segment with highest variance as splitting candidate.
     To ignore high variances in higher image values, we clamp them to approximately double the highest cement value.
+    For a simple example, see figure~\ref{fig:minvar}.
   \end{enumerate}
   
   As we can reuse the system matrix in all cases, they are not considerably different in computational complexion.
-  The first version is the most simple and slightly faster (as we do not need to partition the system and only once split non-connected regions with the same segment ID).
+  The first version is the most simple and slightly faster (as we do not need to partition the system and only once split non-connected regions with the same segment ID) and was thus used when the matrix became more dense (in 3D or in a larger neighborhood).
+  
+  \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth,trim={5cm 2.5cm 5cm 1cm},clip]{imgs/eigen}
+    \caption{\label{fig:eigen}
+      System matrix $\mW$~and consecutive minimal normalized cuts on a simple example.
+      Segments are colored randomly.
+      For assignment to vertebra and filling cement, they will be broken into unconnected regions.}
+  \end{figure}
+  
+    \begin{figure}[h]
+      \centering
+      \begin{subfigure}[t]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={5cm 2.5cm 5cm 1cm},clip]{imgs/minvar1}
+        \vspace{-1cm}
+        \caption*{1st cut}
+      \end{subfigure}
+      \hfill
+      \begin{subfigure}[t]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={5cm 2.5cm 5cm 1cm},clip]{imgs/minvar2}
+        \vspace{-1cm}
+        \caption*{2nd cut}
+      \end{subfigure}
+      \vspace{-1cm}
+      \begin{subfigure}[t]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={5cm 2.5cm 5cm 1cm},clip]{imgs/minvar3}
+        \vspace{-1cm}
+        \caption*{3rd cut}
+      \end{subfigure}
+      \hfill
+      \begin{subfigure}[t]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={5cm 2.5cm 5cm 1cm},clip]{imgs/minvar4}
+        \vspace{-1cm}
+        \caption*{4th cut}
+      \end{subfigure}
+      \vspace{1cm}
+      \caption{\label{fig:minvar}
+        System matrix $\mW$, chosen segment for cutting and consecutive minimal normalized cut on a simple example.
+        Segments are colored randomly.
+        For assignment to vertebra and filling cement, they will be broken into unconnected regions.}
+    \end{figure}
+  
   The recursive variant is outperformed by both the equal area and minimal variance criterion.
   We further observed the cement regions to be rather small compared to the complete vertebra, and thus favor the fourth variance-based approach.
   
   The beauty lies in the applicability of the approach to different inputs, in our case 2D and 3D images.
   We were easily able to develop and debug on 2D images, as the extension to 3D could be achieved with a larger neighborhood and adjustments in the visualization.
+  However, the additional dimension considerably adds to the computation speed and number of required cuts.
+  
   
   
   \section{Results}
   {
     \begin{figure}[h]
       \centering
-      \begin{subfigure}[t]{0.45\linewidth}
+      \begin{subfigure}[t]{0.15\linewidth}
         \centering
-        \includegraphics{test.png}
-        \caption{Subfigures \textit{woopwoop}}
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask04}
       \end{subfigure}
       \hfill
-      \begin{subfigure}[t]{0.45\linewidth}
+      \begin{subfigure}[t]{0.15\linewidth}
         \centering
-        \includegraphics{test.png}
-        \caption{Another really awesome image}
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask05}
       \end{subfigure}
-      \caption{These are some awesome images}
+      \hfill\begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask06}
+      \end{subfigure}
+      \hfill\begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask07}
+      \end{subfigure}
+      \hfill\begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask08}
+      \end{subfigure}
+      \hfill
+      \begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask09}
+      \end{subfigure}
+      \vspace{.5cm}
+      
+      \begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask10}
+      \end{subfigure}
+      \hfill
+      \begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask11}
+      \end{subfigure}
+      \hfill\begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask12}
+      \end{subfigure}
+      \hfill\begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask13}
+      \end{subfigure}
+      \hfill\begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask14}
+      \end{subfigure}
+      \hfill
+      \begin{subfigure}[t]{0.15\linewidth}
+        \centering
+        \includegraphics[width=\linewidth,trim={6cm 3cm 6cm 0},clip]{imgs/mask15}
+      \end{subfigure}
+      
+      \caption{\label{fig:mask}
+      Resulting segmentation of the central vertebra body in dataset $501/601$. Segmented cement is highlighted in red.\\
+      Neighborhood up to $\pm~3 \times \pm~3 \times \pm~2$, $12$ cuts (up to $2^{12}~=~4096$ segments)}
     \end{figure}
   }
-  \pagebreak
+  
+  In figure~\ref{fig:mask}, the segmentation results are shown over all slices containing the vertebra.
+  We observed the mask to vary only slightly across the slices, which is probably due to the low connectivity and small neighborhood in this direction.
+  The mask is thus not a good fit for the data.
+  
+  As our segmentation is obviously not suited for this task, we did not perform any additional comparison with the reference data given.
+  
+      \begin{figure}[h]
+        \centering
+        \begin{subfigure}[t]{0.48\linewidth}
+          \centering
+          \includegraphics[width=\linewidth,trim={5cm 4cm 5cm 1cm},clip]{imgs/vars12}
+          \caption{Slice of 3D segmentation\\
+            Neighborhood up to $\pm~3 \times \pm~3 \times \pm~2$, $12$ cuts (up to $2^{12}~=~4096$ segments with multiple unconnected regions)
+          }
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[t]{0.48\linewidth}
+          \centering
+          \includegraphics[width=\linewidth,trim={5cm 2.6cm 5cm 2.4cm},clip]{imgs/vars12-2D}
+          \caption{Results from 2D segmentation on slice\\
+            Neighborhood up to $\pm~8 \times \pm~8$, $4$ cuts a time, $5$ iteration, minimizing variance (up to $24$ segments with multiple unconnected regions)
+          }
+        \end{subfigure}
+        \caption{\label{fig:2D3D}
+          Segments colored by mean value and masked data, all in slice $12$.
+          Though way fewer segments were created in (b), the fit is better.}
+      \end{figure}
+      
+  For comparison, in figure~\ref{fig:2D3D} 
+  
+%  \pagebreak
   \section{Evaluation}
   
   

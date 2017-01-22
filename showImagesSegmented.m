@@ -24,9 +24,10 @@ function showImagesSegmented(~,eventData,dcmImgs,segments,maxIndex)
     % Save the change you made to the structure
     guidata(gcbo,myhandles);
 
-    img = dcmImgs(:,:,scrollViewIndex+1);
-    segment = segments(:,:,scrollViewIndex+1);
-    imshowSegments( img, segment );
+%     img = dcmImgs(:,:,scrollViewIndex+1);
+%     segment = segments(:,:,scrollViewIndex+1);
+    imshowSegments( dcmImgs, segments, scrollViewIndex+1);
     title(sprintf('Current DCM Image Index: %d',scrollViewIndex));
+    freezeColors;
 end
 

@@ -22,7 +22,7 @@ function imshowMasked( img, mask, slice )
     
     imshow(img+mask*maxVal, [0 2*maxVal]);
     halfMap = [linspace(0,1,128)' linspace(0,1,128)' linspace(0,1,128)'
-               linspace(0.2,1,128)' linspace(0,1,128)' linspace(0,1,128)'];
+               linspace(0.5,1,128)' linspace(0,1,128)' linspace(0,1,128)'];
     colormap(halfMap);
 end
 
