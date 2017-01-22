@@ -1,7 +1,6 @@
-function [result] = NormCutSegmentation( img, mask, neighborhood, minval, viewSlice, variant)
-%NORMCUTSEGMENTATION Segment the image recursively
-%   Split the image in half using normalized cuts. Reinitialize the 
-%   Possible variants: minvar, 
+function [resFull,segNew] = NormCutSegmentation( img, mask, neighborhood, minval, viewSlice, variant)
+%NORMCUTSEGMENTATION Segment the image with method specified and classify.
+%	Segmentation and classification based on similarity and the minval specified. 
 
 if nargin < 5
     viewSlice = ceil(size(img,3)/3);
@@ -23,7 +22,10 @@ imgOld = img;
 % ===== Filter Image ===== %
 % Emphasize the calue region around the minval, where we expect the cement.
 % Map to qurtic root.
-% img = sqrt(img);
+
+minval = (minval) / mean(img(:));
+img = (img) / mean(img(:));
+
 
 figure;
 subplot(1,2,1); imshowMasked(img, mask, viewSlice);
@@ -41,20 +43,22 @@ currentSegmentation = mask - 1;
 currentMask = mask;
 
 if strcmp(variant, 'recursive')
-    [segNew] = RecursiveCut(1, img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 1); 
+    [segNew] = RecursiveCut(1, img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2); 
 elseif strcmp(variant, 'equalarea')
-    [segNew] = EqualSizedNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 1); 
+    [segNew] = EqualSizedNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2); 
 elseif strcmp(variant, 'minvar')
-    [segNew] = MinVarNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 1); 
+    [segNew] = MinVarNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2, 3); 
+elseif strcmp(variant, 'minval')
+    [segNew] = MinValueNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2, 3);
 elseif strcmp(variant, 'eigen')
-     [segNew] = normCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 4, true); 
+    [segNew] = normCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 12); 
 else
     display('Warning: no known variant! Aborting.');
     return;
 end
     
     figure;
-    imshowSegments(img(:,:,viewSlice), segNew+1);  
+    imshowSegments(img, segNew+1, viewSlice);  
     freezeColors;
     
     maxMask = max(max(max(segNew)));
@@ -77,10 +81,10 @@ for m = 0:maxMask
     
     % Choose filling or not.
     avg = mean(img(mMask==1));
-    % variance = var(img(mMask==1))
+    sd = sqrt(var(img(mMask==1)));
     
     vars(mMask==1) = avg;
-    if avg < 60 %avg-variance < minval && avg+variance > minval
+    if avg < minval + sd %avg-variance < minval && avg+variance > minval
         result(mMask==1) = 1;
     end
 end
@@ -92,13 +96,12 @@ title('Variance per Segment');
 freezeColors;
 
 subplot(1,2,2);
-imshowMasked(img(:,:,viewSlice), result);
+imshowMasked(img, result, viewSlice);
 title('Resulting Segmentation');
 freezeColors;
 
 resFull = zeros(size(imgOld));
 resFull(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3)) = result;
-result = repmat(resFull,1,1,numSlices);
 
 end
 
