@@ -32,10 +32,10 @@ subplot(1,2,1); imshowMasked(img, mask, viewSlice);
 
 % Reduce the image to the minimal axis-parallel box around the mask.
 [minBox,maxBox] = MaskBox(mask);
-img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3));
-mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3));
+img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2));
+mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
 
-subplot(1,2,2); imshowMasked(img, mask, viewSlice);
+subplot(1,2,2); imshowMasked(img, mask);
 
 % ======= Display cut eigenvectors ======= %
 % Cut out num eigenvector.
@@ -47,21 +47,21 @@ if strcmp(variant, 'recursive')
 elseif strcmp(variant, 'equalarea')
     [segNew] = EqualSizedNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2); 
 elseif strcmp(variant, 'minvar')
-    [segNew] = MinVarNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2, 3); 
+    [segNew] = MinVarNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2, 5); 
 elseif strcmp(variant, 'minval')
-    [segNew] = MinValueNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2, 3);
+    [segNew] = MinValueNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2, 5);
 elseif strcmp(variant, 'eigen')
-    [segNew] = normCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 3); 
+    [segNew] = normCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 12); 
 else
     display('Warning: no known variant! Aborting.');
     return;
 end
     
     figure;
-    imshowSegments(img, segNew+1, viewSlice);  
+    imshowSegments(img, segNew+1);  
     freezeColors;
     
-    maxMask = max(max(max(segNew)));
+    maxMask = max(max(segNew));
 
 % ======= Final Segmentation ======= %
 
@@ -84,27 +84,38 @@ for m = 0:maxMask
     sd = sqrt(var(img(mMask==1)));
     
     vars(mMask==1) = avg;
-    if avg < minval + sd %avg-variance < minval && avg+variance > minval
+    if avg < minval*3 %avg-variance < minval && avg+variance > minval
         result(mMask==1) = 1;
     end
 end
 
 % Show final image
 subplot(1,2,1);
-imshow(vars(:,:,viewSlice), [0, max(max(max(vars)))]);
+imshow(vars, [0, max(max(vars))]);
 title('Variance per Segment');
 freezeColors;
 
 subplot(1,2,2);
-imshowMasked(img, result, viewSlice);
+imshowMasked(img, result);
 title('Resulting Segmentation');
 freezeColors;
 
+% % Show final image
+% subplot(1,2,1);
+% imshow(vars(:,:,2), [0, max(max(vars))]);
+% title('Variance per Segment');
+% freezeColors;
+% 
+% subplot(1,2,2);
+% imshowMasked(img, result, 2);
+% title('Resulting Segmentation');
+% freezeColors;
+
 maskFull = zeros(size(imgOld));
-maskFull(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3)) = result;
+maskFull(minBox(1):maxBox(1), minBox(2):maxBox(2)) = result;
 
 segFull = zeros(size(imgOld)) - 1;
-segFull(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3)) = segNew;
+segFull(minBox(1):maxBox(1), minBox(2):maxBox(2)) = segNew;
 
 end
 

@@ -41,8 +41,8 @@ maskNew = mask;
 % segNew = currentSegmentation;
 % Reduce the image to the minimal axis-parallel box around the mask.
 [minBox,maxBox] = MaskBox(mask);
-img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3));
-mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3));
+img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2));
+mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
 
 mask = double(mask);
 

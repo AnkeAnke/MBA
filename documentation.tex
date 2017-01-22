@@ -290,12 +290,27 @@
   
   In figure~\ref{fig:mask}, the segmentation results are shown over all slices containing the vertebra.
   We observed the mask to vary only slightly across the slices, which is probably due to the low connectivity and small neighborhood in this direction.
-  The mask is thus not a good fit for the data.
+  The mask is thus not a good fit for the data:
+  The dark regions and the mask rarely coincide, and false positives are found at the border with the spinal disks.
   
-  As our segmentation is obviously not suited for this task, we did not perform any additional comparison with the reference data given.
+  For comparison, in figure~\ref{fig:2D3D} the segmentation for computation per slice is shown. The areas coincide rather well, though false positives appear again.
+  They result from masking by threshold only.
+  A better threshold would have brought about better results in figure~\ref{fig:2D3D}c), but we did not find a generic optimal threshold for all datasets.
+  
+  To achieve better results, we expect variations in $w_{ij}$ to have the best effect.
+  A weight including the probabilities of belonging to either cement or vertebra body might be possible, but computing this probability is another dimension of complexity.
+    
+  As our segmentation was obviously not suited for this task in the end, we did not perform any additional comparison with the reference data given.
   
       \begin{figure}[h]
         \centering
+              \begin{subfigure}[t]{\linewidth}
+                \centering
+                \includegraphics[width=\linewidth,trim={5cm 2cm 5cm 0cm},clip]{imgs/seg12}
+                \caption{Matrix and $12$ 3D cuts viewed in slice 12 }
+              \end{subfigure}
+              
+              
         \begin{subfigure}[t]{0.48\linewidth}
           \centering
           \includegraphics[width=\linewidth,trim={5cm 4cm 5cm 1cm},clip]{imgs/vars12}
@@ -312,15 +327,8 @@
           }
         \end{subfigure}
         \caption{\label{fig:2D3D}
-          Segments colored by mean value and masked data, all in slice $12$.
-          Though way fewer segments were created in (b), the fit is better.}
+          Different segmentation result in slice 12}
       \end{figure}
-      
-  For comparison, in figure~\ref{fig:2D3D} 
-  
-%  \pagebreak
-  \section{Evaluation}
-  
   
   \begin{thebibliography}{9}
     

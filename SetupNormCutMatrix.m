@@ -23,17 +23,17 @@ anisotrophyZ = 6;
 sImg = size(img);
 sX = sImg(1);
 sY = sImg(2);
-sZ = sImg(3);
+
 sSqr = prod(sImg);
 
 
-indexImg = reshape(1:sSqr, sX, sY, sZ);
+indexImg = reshape(1:sSqr, sX, sY);
 
 % Minus middle, only compute half the entries (rest in transposed)
 numN = ((2*neighborhood+1)^2 - 1)/2;
 
 % Add third dimension.
-zNeigh = ceil(neighborhood/anisotrophyZ);
+zNeigh = 0;%max(ceil(neighborhood), floor((sZ-1)/2));
 numN = numN + (2*neighborhood+1)^2 * zNeigh;
 
 % Save coordinates here.
@@ -86,20 +86,16 @@ for neigh = 1:numN
        s1x = 1:sX+x;
    end
    
-   % z is always positive or zero.
-   s0z = 1:sZ-z;
-   s1z = z+1:sZ;
-   
-   conn = (img(s0x,s0y,s0z) - img(s1x,s1y,s1z));
+   conn = (img(s0x,s0y) - img(s1x,s1y));
    % Shi & Malik paper
    conn = exp(-(conn .* conn)/variance);
    % Shi & Malik paper normalizes this by the size variance.
    % Anisotropic voxels: 6 times as large in z as in x or y.
-   conn = conn / sqrt(x*x + y*y + (z*anisotrophyZ)^2);
+   conn = conn / sqrt(x*x + y*y);
   
     % All x/y combinations.
-    so0 = indexImg(s0x, s0y, s0z);
-    so1 = indexImg(s1x, s1y, s1z);
+    so0 = indexImg(s0x, s0y);
+    so1 = indexImg(s1x, s1y);
 
    % Add to graph.
    W = W + sparse( ...
