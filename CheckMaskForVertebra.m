@@ -9,28 +9,31 @@ function containVertebra = CheckMaskForVertebra( initialMask, maskToCheck )
     
     if CC.NumObjects>1
         containVertebra = false;
+        return;
     end
     
     %Second criteria - non zero elements
-    nnzInitMask = nonzeros(initialMask);
-    nnzMaskToCheck = nonzeros(maskToCheck);
-    
-    nnzDifference = abs(length(nnzInitMask)-length(nnzMaskToCheck))
-    
-    if nnzDifference > 500
-        containVertebra = false;
-    end
+%     nnzInitMask = nonzeros(initialMask);
+%     nnzMaskToCheck = nonzeros(maskToCheck);
+%     
+%     nnzDifference = abs(length(nnzInitMask)-length(nnzMaskToCheck))
+%     
+%     if nnzDifference > 500
+%         containVertebra = false;
+%     end
     
     %Third criteria
-    bbInitialMask = MaskBox(initialMask);
-    bbMaskToCheck = MaskBox(maskToCheck);
-    
-    if abs(bbInitialMask(1)-bbMaskToCheck(1)) > bbInitialMask(1)/100*7.5 % 10%
-        containVertebra = false;
-    end
-    if abs(bbInitialMask(2)-bbMaskToCheck(2)) > bbInitialMask(2)/100*12.5 % 10%
-        containVertebra = false;
-    end
+%     bbInitialMask = MaskBox(initialMask);
+%     bbMaskToCheck = MaskBox(maskToCheck);
+%     
+%     if abs(bbInitialMask(1)-bbMaskToCheck(1)) > bbInitialMask(1)/100*7.5 % 10%
+%         containVertebra = false;
+%         return;
+%     end
+%     if abs(bbInitialMask(2)-bbMaskToCheck(2)) > bbInitialMask(2)/100*12.0 % 10%
+%         containVertebra = false;
+%         return;
+%     end
     
     %Fourth criteria
     [m,n] = size(initialMask);
@@ -60,8 +63,9 @@ function containVertebra = CheckMaskForVertebra( initialMask, maskToCheck )
     
     centerMaskDifference = abs(centerInitMask-centerMaskToCheck);
     norm(centerMaskDifference)
-    if norm(centerMaskDifference) > 12.5
+    if norm(centerMaskDifference) > 12.0
         containVertebra = false;
+        return;
     end
 end
 

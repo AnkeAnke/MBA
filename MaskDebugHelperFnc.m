@@ -3,7 +3,8 @@ function MaskDebugHelperFnc( dcmImgsT1, dcmImgsT2, resultMask, index)
 %   Detailed explanation goes here
     %masks=ComputeAllMasks( dcmImgsT1, dcmImgsT2, resultMask, index);
     %masks=ComputeAllMasksV2( dcmImgsT1, dcmImgsT2, resultMask, index);
-    masks=ComputeAllMasksSimple( dcmImgsT1, resultMask);
+    masks=ComputeAllMasksV3( dcmImgsT1, dcmImgsT2, resultMask, index);
+    %masks=ComputeAllMasksSimple( dcmImgsT1, resultMask);
 
     intitalMaskIndex=index;
     initialMaskImg = (masks(:,:,intitalMaskIndex));
