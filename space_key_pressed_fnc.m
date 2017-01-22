@@ -23,7 +23,7 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         %thresheldDcmImgsT2=ThresholdImages(uint16(dcmImgsT2), threshold);
         
         % If we have a better "hole indicator", exchange the parameter.
-        [mask3D,seg3D] = NormCutSegmentation(dcmImgsT2, resultMask, 2, 30, sliceIndex, 'minvar');
+        [mask3D,seg3D] = NormCutSegmentation(dcmImgsT2, resultMask, 2, 30, sliceIndex, 'eigen');
         
 %         segments3D=[];
 %         maxIndex=size(segments3D,3);

@@ -1,4 +1,4 @@
-function [resFull,segNew] = NormCutSegmentation( img, mask, neighborhood, minval, viewSlice, variant)
+function [maskFull,segFull] = NormCutSegmentation( img, mask, neighborhood, minval, viewSlice, variant)
 %NORMCUTSEGMENTATION Segment the image with method specified and classify.
 %	Segmentation and classification based on similarity and the minval specified. 
 
@@ -51,7 +51,7 @@ elseif strcmp(variant, 'minvar')
 elseif strcmp(variant, 'minval')
     [segNew] = MinValueNormCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 2, 3);
 elseif strcmp(variant, 'eigen')
-    [segNew] = normCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 12); 
+    [segNew] = normCut(img, currentMask, neighborhood, minval, currentSegmentation, viewSlice, 3); 
 else
     display('Warning: no known variant! Aborting.');
     return;
@@ -100,8 +100,11 @@ imshowMasked(img, result, viewSlice);
 title('Resulting Segmentation');
 freezeColors;
 
-resFull = zeros(size(imgOld));
-resFull(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3)) = result;
+maskFull = zeros(size(imgOld));
+maskFull(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3)) = result;
+
+segFull = zeros(size(imgOld)) - 1;
+segFull(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3)) = segNew;
 
 end
 
