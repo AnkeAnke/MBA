@@ -8,7 +8,7 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         resultMask = ComputeAllMasksSimple(dcmImgsT2, mask2D);
         %close(figureObject);
         
-        MaskDebugHelperFnc(dcmImgsT1, dcmImgsT2, resultMask, sliceIndex);
+        MaskDebugHelperFnc(dcmImgsT1, dcmImgsT2, mask2D, sliceIndex);
         
         %figure;
         %imshow(max(dcmImgsT2(:)/2.0)*uint16(dcmImgsT2(:,:,myhandles.scrollViewIndex+1)));
