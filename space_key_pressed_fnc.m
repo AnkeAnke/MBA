@@ -9,6 +9,7 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         %close(figureObject);
         
         MaskDebugHelperFnc(dcmImgsT1, dcmImgsT2, mask2D, sliceIndex);
+        %MaskDebugHelperFncV2(dcmImgsT1, dcmImgsT2, mask2D, sliceIndex, 100);
         
         %figure;
         %imshow(max(dcmImgsT2(:)/2.0)*uint16(dcmImgsT2(:,:,myhandles.scrollViewIndex+1)));
@@ -23,12 +24,12 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         %thresheldDcmImgsT2=ThresholdImages(uint16(dcmImgsT2), threshold);
         
         % If we have a better "hole indicator", exchange the parameter.
-        [mask3D,seg3D] = NormCutSegmentation(dcmImgsT2, resultMask, 2, 30, sliceIndex, 'eigen');
+        %[mask3D,seg3D] = NormCutSegmentation(dcmImgsT2, resultMask, 2, 30, sliceIndex, 'eigen');
         
 %         segments3D=[];
 %         maxIndex=size(segments3D,3);
-        figureHandle = figure;
-        set(figureHandle,'windowscrollWheelFcn', {@showImagesSegmented,dcmImgsT2,seg3D});
+        %figureHandle = figure;
+        %set(figureHandle,'windowscrollWheelFcn', {@showImagesSegmented,dcmImgsT2,seg3D});
         %imSeriesShowMasked( dcmImgsT2, result3D, sliceIndex );
         %imSeriesShowMasked( thresheldDcmImgsT2, result3D, sliceIndex );
     end

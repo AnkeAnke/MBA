@@ -23,17 +23,17 @@ function containVertebra = CheckMaskForVertebra( initialMask, maskToCheck )
 %     end
     
     %Third criteria
-%     bbInitialMask = MaskBox(initialMask);
-%     bbMaskToCheck = MaskBox(maskToCheck);
-%     
-%     if abs(bbInitialMask(1)-bbMaskToCheck(1)) > bbInitialMask(1)/100*7.5 % 10%
-%         containVertebra = false;
-%         return;
-%     end
-%     if abs(bbInitialMask(2)-bbMaskToCheck(2)) > bbInitialMask(2)/100*12.0 % 10%
-%         containVertebra = false;
-%         return;
-%     end
+    bbInitialMask = MaskBox(initialMask);
+    bbMaskToCheck = MaskBox(maskToCheck);
+    
+    if abs(bbInitialMask(1)-bbMaskToCheck(1)) > bbInitialMask(1)/100*17.5 % 10%
+        containVertebra = false;
+        return;
+    end
+    if abs(bbInitialMask(2)-bbMaskToCheck(2)) > bbInitialMask(2)/100*20.0 % 10%
+        containVertebra = false;
+        return;
+    end
     
     %Fourth criteria
     [m,n] = size(initialMask);
