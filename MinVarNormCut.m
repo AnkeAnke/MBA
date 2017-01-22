@@ -1,18 +1,22 @@
-function [segNew] = MinVarNormCut(img, mask, neighborhood, minval, currentSegmentation, numCuts )
+function [segNew] = MinVarNormCut(img, mask, neighborhood, minval, currentSegmentation, viewSlice, numCuts, numIterations )
 %RECURSIVECUT Recursively cut the image.
 %   Input: Number of subdivisions per step. Default: 2
 
 % Default: Cut into 4 pieces.
-if nargin < 6
+if nargin < 7
     numCuts = 1;
+end
+if nargin < 8
+    numIterations = 5;
 end
 
 
 % Initialize ssegmentation.
-[segNew, stop] = normCut(img,mask,neighborhood,minval, currentSegmentation, numCuts);
+[segNew, stop, W] = normCut(img,mask,neighborhood,minval, currentSegmentation, viewSlice, numCuts);
 
 % Maximum number of subdivisions.
-for s = 1:5
+for s = 1:numIterations
+    display(['Iteration ' num2str(s) '/' num2str(numIterations)]);
     
     maxSeg = max(max(max(segNew)));  
     maxSegUpdating = maxSeg;
@@ -62,7 +66,7 @@ for s = 1:5
     subMask = subMask + 1;
     
     % We can split again.
-    [segNew, stop] = normCut(img,subMask,neighborhood,minval, segNew, numCuts);
+    [segNew, stop] = normCut(img,subMask,neighborhood,minval, segNew, viewSlice, numCuts, W);
     
     if stop
         % Check if anything changed.
@@ -73,6 +77,5 @@ for s = 1:5
     end  
 end
 
-display('Khalas');
 end
 

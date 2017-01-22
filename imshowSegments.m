@@ -15,6 +15,10 @@ function imshowSegments(img, segments, slice)
     maxVal = max(max(max(img)))+20; % Offset to circumvent wrong interpolation at cuts.
     img(img < 0) = 0;
     numSegs = max(max(max(segments)));
+    if isnan(maxVal)
+        imshow(zeros(size(img)));
+        return;
+    end
     imshow(img+segments*maxVal+10, [0 (numSegs+1)*maxVal]);
     
     % Normal grey map, linear
@@ -25,7 +29,8 @@ function imshowSegments(img, segments, slice)
     colors = jet(numSegs+1)*0.5 + 0.5;
     % Interleave colors.
     % One cut always changes the ID by 1, do this to hichen the contrast.
-    colors(2:2:numSegs+1, :) = colors(2*floor((numSegs+1)/2):-2:2, :);
+    % colors(2:2:numSegs+1, :) = colors(2*floor((numSegs+1)/2):-2:2, :);
+    colors = colors(randperm(size(colors,1)), :);
     for s=0:numSegs
         % Some green pixels to find errors in mapping.
         % As long as you don't see them, everything is fine.

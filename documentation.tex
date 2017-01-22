@@ -56,7 +56,7 @@
   	dicom slice viewer is available, to first let the user decide, which slide he sees fitting to select the ROI. In the next step via, currently two clicks, the user chooses at last the ROI, marking the left upper and the right lower region of the desired vertebra.\\
   	\\In the next stage the actual vertebra segmentation takes place, using the 'Chan-Vese Segmentation' \cite{[ChanVese01]}, which is an active contour algorithm without edges. It is based on a simplified 'Mumford-Shah Model', it requires the approximated function to be piecewise constant instead of smooth and further more results in a binary approximation. The segmentation boundary is represented implicitly with a level set function, which is found by a gradient descent. \\
   	\\ The Matlab implementation of this algorithm provides one parameter, the 'SmoothFactor', which allows us to control the shape of the resulting segmentation.
-  	Low values of 'SmoothFactor', below 1.5, allow for finer details to come through, whereas higher values might smooth over details. For our purpose 3.0 was the value of choice for the 'SmoothFactor' parameter, to achieve satisfying vertebra segmentation results.\\
+  	Low values of 'SmoothFactor', below 1.5, allow for finer details to come through, whereas higher values might smooth over details. For our purpose 2.8 was the value of choice for the 'SmoothFactor' parameter, to achieve satisfying vertebra segmentation results.\\
   	\\For improved vertebra segmentation the T1 plus contrast-agent and T2 MR-sequences are used, by obtaining a segmentation mask with the 'Chan-Vese Segmentation' \cite{[ChanVese01]} on each corresponding user chosen MR-slice. Multiplying both obtained mask results in a satisfactory segmentation of the vertebra.  
   	In order to obtain the remaining masks on the MR-sequence, containing the chosen vertebra and make volumetric measurement of bone cement treatment region possible we apply the 'Chan-Vese Segmentation' \cite{[ChanVese01]} on each MR-slice. \newline 
     We do it in two ways, away from the initially chosen slice. In this process the input mask for the current slice to apply the segmentation algorithm on is the one of its predecessor relative to the initially chosen slice and the 'processing direction'.
@@ -159,6 +159,8 @@
   The first version is the most simple and slightly faster (as we do not need to partition the system and only once split non-connected regions with the same segment ID).
   The recursive variant is outperformed by both the equal area and minimal variance criterion.
   We further observed the cement regions to be rather small compared to the complete vertebra, and thus favor the fourth variance-based approach.
+  
+  To extend the algorithm to 3D, not much has to done.
   
   \section{Results}
   {

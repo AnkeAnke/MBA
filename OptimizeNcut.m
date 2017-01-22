@@ -4,7 +4,7 @@ function [ threshold ] = OptimizeNcut( graph, eigs, numTests )
 
     % Standard arg.
     if nargin < 3
-            numTests = 230;
+            numTests = 30;
     end    
     
     % Eigenvector to vector

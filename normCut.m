@@ -1,5 +1,5 @@
-function [segmentation,stop] = ...
-normCut( img, mask, neighborhood, minval, currentSegmentation, viewSlice, numCuts)
+function [segmentation,stop, Wfull] = ...
+normCut( img, mask, neighborhood, minval, currentSegmentation, viewSlice, numCuts, W)
 
 % ======= Standard Parameters ====== %
 % Set masked-out ares to nan.
@@ -22,7 +22,7 @@ if nargin < 5
 end
 
 % If no viewing slice is specified, don't print debug output.
-if nargin < 6
+if nargin < 6 || viewSlice <= 0
    output = false;
 end
 
@@ -31,7 +31,6 @@ if nargin < 7
    numCuts = 2;
 end
 
-anisotrophyZ = 6;
 % ======= Initialization ====== %
 
 segmentation = currentSegmentation;
@@ -42,125 +41,50 @@ maskNew = mask;
 % segNew = currentSegmentation;
 % Reduce the image to the minimal axis-parallel box around the mask.
 [minBox,maxBox] = MaskBox(mask);
-img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2));
-mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2));
-
-% Save sizes to variables.
-sImg = size(img);
-sX = sImg(1);
-sY = sImg(2);
-sZ = sImg(2);
-sSqr = prod(sImg);
+img  =  img(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3));
+mask = mask(minBox(1):maxBox(1), minBox(2):maxBox(2), minBox(3):maxBox(3));
 
 mask = double(mask);
 
-indexImg = reshape(1:sSqr, sX, sY, sZ);
-
-% Minus middle, only compute half the entries (rest in transposed)
-numN = ((2*neighborhood+1)^2 - 1)/2;
-
-% Add third dimension.
-zNeigh = ceil(neighbor/anisotrophyZ);
-numN = numN + (2*neighborhood+1)^2 * zNeigh;
-
-% Save coordinates here.
-neighs = zeros(numN, 3);
-% ======= Build Connectivity Graph ====== %
-
-% Slow but small: Get all indices of neighbors.
-count = 1;
-for x = -neighborhood:neighborhood
-    for y = -neighborhood:neighborhood
-        for z = -zNeigh:zNeigh
-            if (z>0) ||(z==0) && ...
-                      ((x > 0) || (x == 0 && y > 0))
-               neighs(count) = [x y z]';
-               count = count + 1;
-            end
-        end
-    end
-end 
-
-% Diagonal: Connection to themselves.
-selfDist = reshape(abs(img-minval), sSqr, 1);
-
-% Here the graph will be stored. Upper bound on neighbors: numN.
-graph = sparse(1:sSqr, 1:sSqr, selfDist, sSqr, sSqr, sSqr * numN);
-variance = var(img(mask > 0));
-
-% Fill with submatrices and compute connectivity.
-for neigh = 1:numN
-   [x,y,z] = neighs(neigh);
-   
-   % When we have negative offsets, the direction needs to change.
-   if y>=0
-       s0y = 1:sY-y;
-       s1y = y+1:sY;
-   else
-       s0y = 1-y:sY;
-       s1y = 1:sY+y;
-   end
-   % Same for x (in neighboring z slices).
-   if x>=0
-       s0x = 1:sX-x;
-       s1x = x+1:sX;
-   else
-       s0x = 1-x:sX;
-       s1x = 1:sX+x;
-   end
-   
-   % z is always positive or zero.
-   s0z = 1:sZ-z;
-   s1z = z+1:sZ;
-   
-   conn = (img(s0x,s0y,s0z) - img(s1x,s1y,s1z));
-   % Shi & Malik paper
-   conn = exp(-(conn .* conn)/variance);
-   % Shi & Malik paper normalizes this by the size variance.
-   % Anisotropic voxels: 6 times as large in z as in x or y.
-   conn = conn / sqrt(x*x + y*y + (z*anisotrophyZ)^2);
-  
-    % All x/y combinations.
-    so0 = indexImg(s0x, s0y, s0z);
-    so1 = indexImg(s1x, s1y, s1z);
-
-   % Add to graph.
-   graph = graph + sparse( ...
-        so0, ...
-        so1, ...
-        conn, sSqr, sSqr);
-    graph = graph + sparse( ...
-        so1, ...
-        so0, ...
-        conn, sSqr, sSqr);
+if nargin < 8
+    [W] = SetupNormCutMatrix(img, mask, neighborhood,minval);
+    Wfull = W;
+    % No need to drop any rows - they will all be empty anyways.
+else
+    % Cut all afterwards - this way, it does not matter what mask was used
+    % to create the matrices.
+    Wfull = W;
+    W(maskNew(:)<1, :) = [];
+    W(:, maskNew(:)<1) = [];
 end
 
-% ======= Solve Eigenvalue Problem ====== %
+% Shold be none, actually.
+W( ~any(W,2), : ) = [];  %rows
+W( :, ~any(W,1) ) = [];  %columns
 
-graph( ~any(graph,2), : ) = [];  %rows
-graph( :, ~any(graph,1) ) = [];  %columns
+% Get D from W -> sum up connection.
+Dvec = sum(W);
+D = diag(Dvec);
+
 
 if output
-    sImg = [1 numCuts+2];
-    if numCuts > 2
-        sImg = [2 ceil((numCuts+2)/2)];
-    end
+    % Assume screen ratio is about 3:2
+    gridSize = floor(sqrt((numCuts + 2)/1.5));
+    sImg = [gridSize, ceil((numCuts + 2)/gridSize)];
+%     sImg = [1 numCuts+2];
+%     if numCuts > 2
+%         sImg = [2 ceil((numCuts+2)/2)];
+%     end
     figure
     subplot(sImg(1), sImg(2) ,1);
-    spy(graph)
+    spy(W)
 end
 
-% Sum up connection.
-Dvec = sum(graph);
-D = diag(Dvec);
-Dimg = mask;
-Dimg(mask>0) = full(Dvec) / max(Dvec);
-% figure, imshow(Dimg);
 
 % Solve eigenvalue problem.
 % Probably the most expensive line in this script.
-[eigVec,eigVal] = eigs(D-graph,D,numCuts+1,'sm');
-
+[eigVec,eigVal] = eigs(D-W,D,numCuts+1,'sm');
+display('Eigenvalue computation complete.')
 % Check whether the matrix is nearly singular.
 % [~, LASTID] = lastwarn;
 % if strcmp(LASTID, 'MATLAB:nearlySingularMatrix')
@@ -168,7 +92,7 @@ Dimg(mask>0) = full(Dvec) / max(Dvec);
 %     return;
 % end
 
-display('Minimal Eigenvalues');
+display('Minimal eigenvalues:')
 
 % Map to range [-1,1]
 eigVec = eigVec * diag(1./sum(eigVec,1))';
@@ -177,7 +101,7 @@ eigVec = eigVec * diag(1./sum(eigVec,1))';
 if output
     % Plot input segmented image (color overlay)
     subplot(sImg(1), sImg(2) ,2); 
-    imshowSegments(bigImg(:,:,viewSlice), currentSegmentation(:,:,viewSlice));
+    imshowSegments(bigImg, currentSegmentation, viewSlice);
     title('Input');
     freezeColors;
 end
@@ -205,7 +129,7 @@ for v = 1:numCuts%numCuts+1:-1:2
     fullImg(fullImg<=0) = -10;
     
     % Compute the optimal cut value and build a colormap from it.
-    cuts(v) = OptimizeNcut(graph, evec);
+    cuts(v) = OptimizeNcut(W, evec);
     
     
     % Update segmentation
@@ -216,12 +140,15 @@ for v = 1:numCuts%numCuts+1:-1:2
     if output
         % Plot input segmented image (color overlay)
         subplot(sImg(1), sImg(2) ,v+2);
-        imshowSegments(bigImg(:,:,viewSlice), segmentation(:,:,viewSlice));
+        imshowSegments(bigImg, segmentation, viewSlice);
         title(['Cut ' num2str(v)]);
         freezeColors;
     end
 
 end
+
+% figureHandle = figure;
+% set(figureHandle,'windowscrollWheelFcn', {@showImagesSegmented,segmentation,segmentImgSize,maxIndex});
 
 end
 

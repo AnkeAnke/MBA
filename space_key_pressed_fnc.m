@@ -4,8 +4,8 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         % Get the structure using guidata in the local function
         myhandles = guidata(gcbo);
         sliceIndex = myhandles.scrollViewIndex+1;
-        Mask2D=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,sliceIndex)), uint16(dcmImgsT2(:,:,sliceIndex)) );
-        resultMask = ComputeAllMasksSimple(dcmImgsT2, Mask2D);
+        mask2D=VertebraSegmentationT1T2V2( uint16(dcmImgsT1(:,:,sliceIndex)), uint16(dcmImgsT2(:,:,sliceIndex)) );
+        resultMask = ComputeAllMasksSimple(dcmImgsT2, mask2D);
         %close(figureObject);
         
         MaskDebugHelperFnc(dcmImgsT1, dcmImgsT2, resultMask, sliceIndex);
@@ -23,7 +23,7 @@ function space_key_pressed_fnc( figureObject, ~, dcmImgsT1, dcmImgsT2)
         %thresheldDcmImgsT2=ThresholdImages(uint16(dcmImgsT2), threshold);
         
         % If we have a better "hole indicator", exchange the parameter.
-        result3D = NormCutSegmentation(dcmImgsT2, resultMask, 8, 30, sliceIndex, 'minvar');
+        [mask3D,seg3D] = NormCutSegmentation(dcmImgsT2, resultMask, 2, 30, sliceIndex, 'minvar');
         
         %imSeriesShowMasked( dcmImgsT2, result3D, sliceIndex );
         %imSeriesShowMasked( thresheldDcmImgsT2, result3D, sliceIndex );
