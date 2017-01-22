@@ -40,7 +40,7 @@
     \end{enumerate}
     We decided to keep it as simple as possible, by implementing the task at hand 
     entirely on Matlab. 
-    As we are faced with possibly very uncommonly-shaped regions, we chose 'Normalized Graph Cuts' \cite{[ShiMalik00]} as our segmentation algorithm.
+    As we are faced with possibly very uncommonly-shaped regions, we chose \textit{Normalized Graph Cuts} \cite{[ShiMalik00]} as our segmentation algorithm.
     It is heavily based on matrix operations and does not enforce any 'roundness' of the result.
     \\Matlab also has its own implementation of an active contour
     operation \cite{[ChanVese01]}, which could be used to segment the vertebra needed to a satisfying degree for the actual task of bone cement volumetry.\\	
@@ -48,56 +48,10 @@
     Afterwards, we will move on to describing our chosen filling compound segmentation inside the vertebra.
     At last in the remaining two chapters we will present our results and evaluate them, to see how well our application fare against the ground truth solution.
     on MR-images of a spline.
-    Our application is required 
-    to detect such regions of the spine reliably to allow for volumetric measurements.\\
-    \\The data that is given presents the challenge, MR-images, which do not have
-    the strong contrast of CT-images nor are as noise free as CT-images, when it
-    comes to bone tissue. Thus more image processing becomes necessary to possibly 
-    achieve equally as good result as working with CT data.
-    At its core this is a non trivial segmentation task, which requires a thought 
-    through choice of image processing and segmentation algorithms.\\
-    \\Our approach was to split the solution to the problem in two steps:
-    \begin{enumerate}
-      \item Single out one vertebra of choice, by user input (e.g. a single mouse click).
-      \item Segment the chosen vertebra to its extent over the MR-images and measure the hollow regions volume, as precise as possible.
-    \end{enumerate}
-    We decided to keep it as simple as possible, by implementing the task at hand 
-    entirely on Matlab. 
-    As we are faced with possibly very uncommonly-shaped regions, we chose 'Normalized Graph Cuts' \cite{[ShiMalik00]} as our segmentation algorithm.
-    It is heavily based on matrix operations and does not enforce any 'roundness' of the result.
-    \\Matlab also has its own implementation of an active contour
-    operation \cite{[ChanVese01]}, which could be used to segment the vertebra needed to a satisfying degree for the actual task of bone cement volumetry.\\	
-    \\In the following chapters we will first describe how we implemented the vertebra segmentation.
-    Afterwards, we will move on to describing our chosen filling compound segmentation inside the vertebra.
-    At last in the remaining two chapters we will present our results and evaluate them, to see how well our application fare against the ground truth solution.
   }
   \pagebreak
   \section{Vertebra Segmentation}
   {
-    The implementation of the vertebra segmentation makes solely use of features and algorithms
-    of Matlab. At first we let the user select a vertebra interactively. For that purpose a basic 
-    dicom slice viewer is available, to first let the user decide, which slide he sees fitting to select the ROI. In the next step via, currently two clicks, the user chooses at last the ROI, marking the left upper and the right lower region of the desired vertebra.\\
-    \\In the next stage the actual vertebra segmentation takes place, using the 'Chan-Vese Segmentation' \cite{[ChanVese01]}, which is an active contour algorithm without edges. It is based on a simplified 'Mumford-Shah Model', it requires the approximated function to be piecewise constant instead of smooth and further more results in a binary approximation. The segmentation boundary is represented implicitly with a level set function, which is found by a gradient descent. \\
-    \\ The Matlab implementation of this algorithm provides one parameter, the 'SmoothFactor', which allows us to control the shape of the resulting segmentation.
-    Low values of 'SmoothFactor', below 1.5, allow for finer details to come through, whereas higher values might smooth over details. For our purpose 3.0 was the value of choice for the 'SmoothFactor' parameter, to achieve satisfying vertebra segmentation results.\\
-    \\For improved vertebra segmentation the T1 plus contrast-agent and T2 MR-sequences are used, by obtaining a segmentation mask with the 'Chan-Vese Segmentation' \cite{[ChanVese01]} on each corresponding user chosen MR-slice. Multiplying both obtained mask results in a satisfactory segmentation of the vertebra.  
-    In order to obtain the remaining masks on the MR-sequence, containing the chosen vertebra and make volumetric measurement of bone cement treatment region possible we apply the 'Chan-Vese Segmentation' \cite{[ChanVese01]} on each MR-slice. \newline 
-    We do it in two ways, away from the initially chosen slice. In this process the input mask for the current slice to apply the segmentation algorithm on is the one of its predecessor relative to the initially chosen slice and the 'processing direction'.
-    \begin{figure}[h]
-      \centering
-      \begin{subfigure}[t]{0.45\linewidth}
-        \centering
-        \includegraphics[scale=1.4]{VertebraSegmentationExample_1.png}
-        
-      \end{subfigure}
-      \hfill
-      \begin{subfigure}[t]{0.45\linewidth}
-        \centering
-        \includegraphics[scale=0.4]{VertebraSegmentationExample_2.png}
-      \end{subfigure}
-      \caption{Vertebra Segmentation Example\\
-        The segmented area containing the cement region is highlighted in red. For further processing, the data is shrunk to the minimal box enclosing the mask.}
-    \end{figure} 
     The implementation of the vertebra segmentation makes solely use of features and algorithms
     of Matlab. At first we let the user select a vertebra interactively. For that purpose a basic 
     dicom slice viewer is available, to first let the user decide, which slide he sees fitting to select the ROI. In the next step via, currently two clicks, the user chooses at last the ROI, marking the left upper and the right lower region of the desired vertebra.\\
@@ -106,9 +60,13 @@
     Low values of 'SmoothFactor', below 0, allow for finer details to come through, whereas higher values might smooth over details. For our purpose 3.0 was the value of choice for the 'SmoothFactor' parameter and a count of 200 for the iterations, to achieve satisfying vertebra segmentation results.\\
     \\For improved vertebra segmentation the T1 plus contrast-agent and T2 MR-sequences are used, by obtaining a segmentation mask with the \textit{Chan-Vese Segmentation} \cite{[ChanVese01]} on each corresponding user chosen MR-slice. Multiplying both obtained mask results in a satisfactory segmentation of the vertebra.  
     Initially in order to obtain the remaining masks on the MR-sequence, containing the chosen vertebra and make volumetric measurement of bone cement treatment region possible we applied the \textit{Chan-Vese Segmentation} \cite{[ChanVese01]} on each MR-slice. \newline 
-    We did it in two ways, away from the initially chosen slice. In this process the input mask for the current slice to apply the segmentation algorithm on is the one of its predecessor relative to the initially chosen slice and the 'processing direction'.
-    Unfortunately the results of successive application of the described scheme were highly inaccurate on not vertically aligned, slightly rotated slices.\\
-    \\In the end a simpler solution was implemented, using the same fist result mask for each MR-slice. Unfortunately it also could not be achieved to reduce the user interaction to only one click due otherwise poor results with the \textit{Chan-Vese Segmentation}. 
+    We did it in two ways, away from the initially chosen slice. In this process the input mask for the current slice to apply the segmentation algorithm on is always the first resulting segmentation. To further refine the result a function was implemented, by which we attempt is to discard segmentation computation based on three criteria:
+    \begin{enumerate}
+    	\item Number of segment components (must be one).
+    	\item Comparison of the minimal bounding box extent of the new segmentation to the first computed result.
+    	\item Comparison of the position of the 'center points' (sum of all segment coordinates and divide by their count) of the new segmentation to the first computed result. 
+    \end{enumerate}
+	If one criteria is above a certain threshold then the segmentation from the current slice index will not be applied. This function does not work completely on all vertebra, but in case of uncertainty the segmentation algorithm is applied on all MR-images to ensure, that the whole vertebra is contained. Suitable thresholds were acquired through testing.\\
     \begin{figure}[h]
       \centering
       \begin{subfigure}[t]{0.45\linewidth}
@@ -122,7 +80,7 @@
         \includegraphics[scale=0.4]{VertebraSegmentationExample_2.png}
       \end{subfigure}
       \caption{Vertebra Segmentation Example\\
-        The segmented area containing the cement region is highlighted in red. For further processing, the data is shrunk to the minimal box enclosing the mask.}
+        \textit{The segmented area containing the cement region is highlighted in red. For further processing, the data is shrunk to the minimal box enclosing the mask.}}
     \end{figure} 
   }	
   
